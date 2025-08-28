@@ -1,0 +1,56 @@
+/* every grid is 30px */
+body{
+    background-image:url("assets/bg.png");
+}
+
+#gamewindow{
+    position: fixed;
+    left: 600px;
+    top: 150px;
+}
+
+#nextwindow{
+    position:fixed;
+    left: 960px;
+    top: 150px;
+}
+
+#nexttxt{
+    font-family: "Press Start 2P", system-ui;
+    position: fixed;
+    color: #CACACA;
+    font-size: 12px;
+    left: 960px;
+    top: 300px;
+}
+
+#menuwindow{
+    position:fixed;
+    left: 960px;
+    top: 330px;
+}
+
+.astxt{
+    background:none;
+    border:none;
+    margin:0;
+    padding:0;
+    cursor: pointer;
+    color: #CACACA;
+    font-family: "Press Start 2P", system-ui;
+    font-size: 16px;
+}
+
+#pausebutt{
+    position: fixed;
+    left: 1035px;
+    top: 360px;
+    transform: translate(-50%, 0);
+}
+
+#restartbutt{
+    position: fixed;
+    left: 1035px;
+    top: 390px;
+    transform: translate(-50%, 0);
+}
