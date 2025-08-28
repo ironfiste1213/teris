@@ -1,56 +1,78 @@
-/* every grid is 30px */
-body{
-    background-image:url("assets/bg.png");
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: "Press Start 2P", system-ui;
+  font-size: 14px;
 }
 
-#gamewindow{
-    position: fixed;
-    left: 600px;
-    top: 150px;
+body {
+  background-image: url("/Assets/bg.png");
+  color: #CFCFCF;
+  font-family: Arial, sans-serif;
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  padding: 20px;
 }
 
-#nextwindow{
-    position:fixed;
-    left: 960px;
-    top: 150px;
+#game-container {
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 100px;
+  max-width: 100%;
+  overflow: auto;
 }
 
-#nexttxt{
-    font-family: "Press Start 2P", system-ui;
-    position: fixed;
-    color: #CACACA;
-    font-size: 12px;
-    left: 960px;
-    top: 300px;
+#board {
+  display: grid;
+  grid-template-columns: repeat(10, 30px);
+  grid-template-rows: repeat(20, 30px);
+  background: #212121;
+  border: 2px solid #CFCFCF;
 }
 
-#menuwindow{
-    position:fixed;
-    left: 960px;
-    top: 330px;
+.cell {
+  width: 30px;
+  height: 30px;
+  border: 1px solid #333;
+  background: #212121;
 }
 
-.astxt{
-    background:none;
-    border:none;
-    margin:0;
-    padding:0;
-    cursor: pointer;
-    color: #CACACA;
-    font-family: "Press Start 2P", system-ui;
-    font-size: 16px;
+#sidebar {
+  display: flex;
+  flex-direction: column;
 }
 
-#pausebutt{
-    position: fixed;
-    left: 1035px;
-    top: 360px;
-    transform: translate(-50%, 0);
+#next {
+  display: grid;
+  grid-template-columns: repeat(4, 30px);
+  grid-template-rows: repeat(4, 30px);
+  background: #212121;
+  border: 2px solid #CFCFCF;
 }
 
-#restartbutt{
-    position: fixed;
-    left: 1035px;
-    top: 390px;
-    transform: translate(-50%, 0);
+#score {
+  font-size: 24px;
+  font-weight: bold;
+  border: 2px solid #CFCFCF;
+  align-self: center;
+  width: 120px;
+  height: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+
+#sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
