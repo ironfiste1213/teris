@@ -1,0 +1,71 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: "Press Start 2P", system-ui;
+}
+
+body {
+  background-color: #1a1a1a;
+  color: #CFCFCF;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  position: relative;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 200%;
+  height: 200%;
+  background-image: 
+    linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px);
+  background-size: 30px 30px;
+  animation: scrollGrid 40s linear infinite;
+  z-index: -1;
+  pointer-events: none;
+}
+
+@keyframes scrollGrid {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 1000px 1000px;
+  }
+}
+
+#menu {
+  text-align: center;
+}
+
+#menu h1 {
+  font-size: 148px;
+  margin-bottom: 40px;
+  color: #CFCFCF;
+}
+
+.start-button {
+  display: inline-block;
+  padding: 20px 40px;
+  background-color: #212121;
+  border: 2px solid #CFCFCF;
+  color: #CFCFCF;
+  text-decoration: none;
+  font-size: 18px;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+.start-button:hover {
+  background-color: #333;
+}
+
+.start-button:active {
+  transform: scale(0.95);
+}

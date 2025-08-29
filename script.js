@@ -324,10 +324,9 @@ document.addEventListener('keydown', (e) => {
       holdPiece();
       break;
 
-    case 'p':
-    case 'P':
-      state.paused = !state.paused;
-      break;
+    case 'r':
+    case 'R':
+      location.reload();
   }
 
   render();
