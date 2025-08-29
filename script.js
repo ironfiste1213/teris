@@ -320,6 +320,11 @@ document.addEventListener('keydown', (e) => {
   render();
 });
 
+document.getElementById("restart-button").addEventListener("click", () => {
+  location.reload();
+});
+
+
 state.nextQ = bag();
 spawnPiece();
 renderHold();

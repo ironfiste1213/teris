@@ -157,3 +157,24 @@ body::before {
 .hit-drop-animation {
   animation: hitDrop 0.3s ease forwards;
 }
+
+#restart-button {
+  width: 120px;
+  height: 40px;
+  font-size: 12px;
+  font-family: "Press Start 2P", system-ui;
+  color: #CFCFCF;
+  background-color: #212121;
+  border: 2px solid #CFCFCF;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+#restart-button:hover {
+  background-color: #333;
+}
+
+#restart-button:active {
+  transform: scale(0.95);
+}
