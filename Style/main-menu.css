@@ -45,10 +45,23 @@ body::before {
   text-align: center;
 }
 
+
+@keyframes colorCycle {
+  0%   { color: #6ec1e4; }
+  14%  { color: #f7d06b; }
+  28%  { color: #c38ddb; }
+  42%  { color: #85d18d; }
+  57%  { color: #f28b82; }
+  71%  { color: #8ecae6; }
+  85%  { color: #f9bc60; }
+  100% { color: #6ec1e4; } 
+}
+
 #menu h1 {
   font-size: 148px;
   margin-bottom: 40px;
-  color: #CFCFCF;
+  animation: colorCycle 30s infinite linear;
+  transition: color 0.5s;
 }
 
 .start-button {
