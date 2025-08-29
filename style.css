@@ -18,8 +18,8 @@ body {
 
 #game-container {
   display: grid;
-  grid-template-columns: auto auto;
-  gap: 100px;
+  grid-template-columns: 140px auto 140px;
+  gap: 40px;
   max-width: 100%;
   overflow: auto;
 }
@@ -39,24 +39,17 @@ body {
   background: #212121;
 }
 
-#sidebar {
+#sidebar-left {
   display: flex;
   flex-direction: column;
-}
-
-#next {
-  display: grid;
-  grid-template-columns: repeat(4, 30px);
-  grid-template-rows: repeat(4, 30px);
-  background: #212121;
-  border: 2px solid #CFCFCF;
+  gap: 40px;
+  align-items: center;
 }
 
 #score {
   font-size: 24px;
   font-weight: bold;
   border: 2px solid #CFCFCF;
-  align-self: center;
   width: 120px;
   height: 60px;
   display: flex;
@@ -64,15 +57,76 @@ body {
   align-items: center;
 }
 
+#hold {
+  display: grid;
+  grid-template-columns: repeat(4, 20px);
+  grid-template-rows: repeat(4, 20px);
+  gap: 1px;
+  background: #212121;
+  border: 2px solid #CFCFCF;
+  border-radius: 4px;
+  width: fit-content;
+  padding: 3px;
+}
 
-#sidebar {
+#hold .cell {
+  width: 20px;
+  height: 20px;
+  border: 1px solid #333;
+  background: #212121;
+  border-radius: 2px;
+}
+
+#sidebar-right {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  align-items: flex-start;
+  width: 140px;
+}
+
+#next {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+.next-preview {
+  display: grid;
+  grid-template-columns: repeat(4, 20px);
+  grid-template-rows: repeat(4, 20px);
+  gap: 1px;
+  background: #212121;
+  border: 2px solid #CFCFCF;
+  border-radius: 4px;
+  width: fit-content;
+  padding: 3px;
+}
+
+.next-preview .cell {
+  width: 20px;
+  height: 20px;
+  border: 1px solid #333;
+  background: #212121;
+  border-radius: 2px;
 }
 
 .section {
   display: flex;
   flex-direction: column;
   gap: 4px;
+}
+
+@keyframes hitDrop {
+  0%   { transform: translateY(0); }
+  50%  { transform: translateY(10px); }
+  100% { transform: translateY(0); }
+}
+
+.hit-drop-animation {
+  animation: hitDrop 0.3s ease forwards;
 }

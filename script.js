@@ -1,89 +1,55 @@
 const board = document.getElementById("board");
 const next = document.getElementById("next");
+const hold = document.getElementById("hold");
+
 const colum = 10;
 const row = 20;
 
-//const boardArray = []
 for (let i = 0; i < row; i++) {
   for (let j = 0; j < colum; j++) {
     const cell = document.createElement('div');
     cell.classList.add('cell');  
     board.appendChild(cell);
-    //boardArray.
   }
 }
 
-for (let i = 0; i < 4; i++) {
-  for (let j = 0; j < 4; j++) {
-    const cell = document.createElement('div');
-    cell.classList.add('cell'); 
-    next.appendChild(cell);
-  }
+for (let i = 0; i < 16; i++) {
+  const holdCell = document.createElement('div');
+  holdCell.classList.add('cell'); 
+  hold.appendChild(holdCell);
 }
 
 const boardCells = Array.from(board.children);
-const nextCells = Array.from(next.children);
+const holdCells = Array.from(hold.children);
+
 const COLORS = {
-  I: "#555555",
-  O: "#707070",
-  T: "#8C8C8C",
-  S: "#777777",
-  Z: "#A0A0A0",
-  J: "#CCCCCC",
-  L: "#EEEEEE"
+  I: "#6ec1e4",
+  O: "#f7d06b",
+  T: "#c38ddb",
+  S: "#85d18d",
+  Z: "#f28b82",
+  J: "#8ecae6",
+  L: "#f9bc60"
 };
-const GHOST_COLOR = '#ffffff10'
+
+const GHOST_COLOR = '#ffffff10';
 
 const SHAPES = {
-  I: [
-    [[0,1],[1,1],[2,1],[3,1]],
-    [[2,0],[2,1],[2,2],[2,3]],
-    [[0,2],[1,2],[2,2],[3,2]],
-    [[1,0],[1,1],[1,2],[1,3]]
-  ],
-  O: [
-    [[0,0],[1,0],[0,1],[1,1]],
-    [[0,0],[1,0],[0,1],[1,1]],
-    [[0,0],[1,0],[0,1],[1,1]],
-    [[0,0],[1,0],[0,1],[1,1]]
-  ],
-  T: [
-    [[1,0],[0,1],[1,1],[2,1]],
-    [[1,0],[0,1],[1,1],[1,2]],
-    [[0,1],[1,1],[2,1],[1,2]],
-    [[1,0],[1,1],[2,1],[1,2]]
-  ],
-  S: [
-    [[1,0],[2,0],[0,1],[1,1]],
-    [[1,0],[1,1],[2,1],[2,2]],
-    [[1,1],[2,1],[0,2],[1,2]],
-    [[0,0],[0,1],[1,1],[1,2]]
-  ],
-  Z: [
-    [[0,0],[1,0],[1,1],[2,1]],
-    [[2,0],[1,1],[2,1],[1,2]],
-    [[0,1],[1,1],[1,2],[2,2]],
-    [[1,0],[0,1],[1,1],[0,2]]
-  ],
-  J: [
-    [[0,0],[0,1],[1,1],[2,1]],
-    [[1,0],[2,0],[1,1],[1,2]],
-    [[0,1],[1,1],[2,1],[2,2]],
-    [[1,0],[1,1],[0,2],[1,2]]
-  ],
-  L: [
-    [[2,0],[0,1],[1,1],[2,1]],
-    [[1,0],[1,1],[1,2],[2,2]],
-    [[0,1],[1,1],[2,1],[0,2]],
-    [[0,0],[1,0],[1,1],[1,2]]
-  ]
-}
-
+  I: [[[0,1],[1,1],[2,1],[3,1]], [[2,0],[2,1],[2,2],[2,3]], [[0,2],[1,2],[2,2],[3,2]], [[1,0],[1,1],[1,2],[1,3]]],
+  O: [[[0,0],[1,0],[0,1],[1,1]], [[0,0],[1,0],[0,1],[1,1]], [[0,0],[1,0],[0,1],[1,1]], [[0,0],[1,0],[0,1],[1,1]]],
+  T: [[[1,0],[0,1],[1,1],[2,1]], [[1,0],[0,1],[1,1],[1,2]], [[0,1],[1,1],[2,1],[1,2]], [[1,0],[1,1],[2,1],[1,2]]],
+  S: [[[1,0],[2,0],[0,1],[1,1]], [[1,0],[1,1],[2,1],[2,2]], [[1,1],[2,1],[0,2],[1,2]], [[0,0],[0,1],[1,1],[1,2]]],
+  Z: [[[0,0],[1,0],[1,1],[2,1]], [[2,0],[1,1],[2,1],[1,2]], [[0,1],[1,1],[1,2],[2,2]], [[1,0],[0,1],[1,1],[0,2]]],
+  J: [[[0,0],[0,1],[1,1],[2,1]], [[1,0],[2,0],[1,1],[1,2]], [[0,1],[1,1],[2,1],[2,2]], [[1,0],[1,1],[0,2],[1,2]]],
+  L: [[[2,0],[0,1],[1,1],[2,1]], [[1,0],[1,1],[1,2],[2,2]], [[0,1],[1,1],[2,1],[0,2]], [[0,0],[1,0],[1,1],[1,2]]]
+};
 
 let state = {
-  grid: Array.from({length: row}, () => Array(colum).fill(0)),
-  active: null,    
-  nextQ: [],        
+  grid: Array.from({ length: row }, () => Array(colum).fill(0)),
+  active: null,
+  nextQ: [],
+  hold: null,
+  canHold: true,
   score: 0,
   lines: 0,
   level: 1,
@@ -92,9 +58,6 @@ let state = {
 };
 
 function bag() {
-  if (state.over) {
-    return 
-  }
   const pieces = ['I','O','T','S','Z','J','L'];
   const shuffled = [];
 
@@ -107,12 +70,24 @@ function bag() {
   return shuffled;
 }
 
-function spawnPiece() {
-  if (state.over) {
-    return 
+const nextPreviews = [];
+for (let i = 0; i < 5; i++) {
+  const preview = document.createElement('div');
+  preview.classList.add('next-preview');
+  for (let j = 0; j < 16; j++) {
+    const cell = document.createElement('div');
+    cell.classList.add('cell');
+    preview.appendChild(cell);
   }
-  if (state.nextQ.length === 0) {
-    state.nextQ = bag();
+  next.appendChild(preview);
+  nextPreviews.push(Array.from(preview.children));
+}
+
+function spawnPiece() {
+  if (state.over) return;
+
+  if (state.nextQ.length < 7) {
+    state.nextQ = state.nextQ.concat(bag());
   }
 
   const type = state.nextQ.shift();
@@ -123,7 +98,29 @@ function spawnPiece() {
     y: -1,
     rotation: 0
   };
-  rendernext()
+
+  state.canHold = true;
+  renderNext();
+}
+
+function holdPiece() {
+  if (!state.canHold) return;
+
+  const current = state.active.type;
+
+  if (state.hold === null) {
+    state.hold = current;
+    spawnPiece();
+  } else {
+    [state.hold, state.active.type] = [current, state.hold];
+    state.active.x = 3;
+    state.active.y = -1;
+    state.active.rotation = 0;
+  }
+
+  state.canHold = false;
+  renderHold();
+  render();
 }
 
 function renderGrid() {
@@ -146,13 +143,13 @@ function getGhostY() {
 }
 
 function render() {
-  if (state.over) {
-    return 
-  }
+  if (state.over) return;
+
   renderGrid();
 
   const shape = SHAPES[state.active.type][state.active.rotation];
   const ghostY = getGhostY();
+
   shape.forEach(([dx, dy]) => {
     const x = state.active.x + dx;
     const y = ghostY + dy;
@@ -161,6 +158,7 @@ function render() {
       boardCells[index].style.backgroundColor = GHOST_COLOR;
     }
   });
+
   shape.forEach(([dx, dy]) => {
     const x = state.active.x + dx;
     const y = state.active.y + dy;
@@ -170,34 +168,51 @@ function render() {
     }
   });
 }
-function rendernext() {
-  if (state.nextQ.length === 0) {
-    state.nextQ = bag();
-  }
-  nextCells.forEach((d) => {
-    d.style.backgroundColor = '#212121';
+
+function renderNext() {
+  nextPreviews.forEach(cells => {
+    cells.forEach(cell => (cell.style.backgroundColor = '#212121'));
   });
 
-  const type = state.nextQ[0];
-  const shape = SHAPES[type][0];
-  for (let i = 0; i < 4; i++) {
-    nextCells[shape[i][0] + shape[i][1] * 4].style.backgroundColor = COLORS[type];
+  for (let i = 0; i < 5; i++) {
+    const type = state.nextQ[i];
+    if (!type) continue;
+
+    const shape = SHAPES[type][0];
+    const cells = nextPreviews[i];
+
+    shape.forEach(([dx, dy]) => {
+      const index = dy * 4 + dx;
+      if (index >= 0 && index < cells.length) {
+        cells[index].style.backgroundColor = COLORS[type];
+      }
+    });
   }
+}
+
+function renderHold() {
+  holdCells.forEach(cell => (cell.style.backgroundColor = '#212121'));
+
+  if (!state.hold) return;
+
+  const shape = SHAPES[state.hold][0];
+  shape.forEach(([dx, dy]) => {
+    const index = dy * 4 + dx;
+    holdCells[index].style.backgroundColor = COLORS[state.hold];
+  });
 }
 
 function isValidMove(xOffset, yOffset, rotation) {
   const shape = SHAPES[state.active.type][rotation];
-
   for (const [dx, dy] of shape) {
     const x = state.active.x + dx + xOffset;
     const y = state.active.y + dy + yOffset;
-
     if (x < 0 || x >= colum || y >= row) return false;
     if (y >= 0 && state.grid[y][x] !== 0) return false;
   }
-
   return true;
 }
+
 function lockPiece() {
   const shape = SHAPES[state.active.type][state.active.rotation];
   shape.forEach(([dx, dy]) => {
@@ -209,7 +224,6 @@ function lockPiece() {
       state.over = true;
       clearInterval(loopid);
       alert("Game Over");
-      return
     }
   });
 
@@ -227,17 +241,7 @@ function clearLines() {
       y++;
     }
   }
-}
-
-function gameLoop() {
-  if (state.over || state.paused) return 
-  if (isValidMove(0, 1, state.active.rotation)) {
-    state.active.y += 1;
-  } else {
-    lockPiece();
-  }
-
-  render();
+  document.getElementById('score').textContent = state.score;
 }
 
 function hardDrop() {
@@ -245,6 +249,23 @@ function hardDrop() {
     state.active.y += 1;
   }
   lockPiece();
+  render();
+
+  const container = document.getElementById("game-container");
+  container.classList.add("hit-drop-animation");
+
+  container.addEventListener("animationend", () => {
+    container.classList.remove("hit-drop-animation");
+  }, { once: true });
+}
+
+function gameLoop() {
+  if (state.over || state.paused) return;
+  if (isValidMove(0, 1, state.active.rotation)) {
+    state.active.y += 1;
+  } else {
+    lockPiece();
+  }
   render();
 }
 
@@ -269,30 +290,40 @@ document.addEventListener('keydown', (e) => {
     case 'ArrowDown':
     case 's':
     case 'S':
-      if (isValidMove(0, 1, state.active.rotation)) {
-        state.active.y += 1;
-      } else {
-        lockPiece();
-      }
+      if (isValidMove(0, 1, state.active.rotation)) state.active.y += 1;
+      else lockPiece();
       break;
 
     case 'ArrowUp': 
     case 'w':
     case 'W':
-      const newRotation = (state.active.rotation + 1) % SHAPES[state.active.type].length;
-      if (isValidMove(0, 0, newRotation)) {
-        state.active.rotation = newRotation;
+      let newRot = (state.active.rotation + 1) % 4;
+      if (isValidMove(0, 0, newRot)) {
+        state.active.rotation = newRot;
       }
       break;
 
     case ' ':
       hardDrop();
       break;
+
+    case 'Shift':
+      holdPiece();
+      break;
+
+    case 'p':
+    case 'P':
+      state.paused = !state.paused;
+      break;
   }
 
   render();
 });
 
+state.nextQ = bag();
 spawnPiece();
+renderHold();
+renderNext();
 render();
-let loopid = setInterval(gameLoop, 500);
+
+const loopid = setInterval(gameLoop, 700);
