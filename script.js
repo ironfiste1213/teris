@@ -8,14 +8,14 @@ const row = 20;
 for (let i = 0; i < row; i++) {
   for (let j = 0; j < colum; j++) {
     const cell = document.createElement('div');
-    cell.classList.add('cell');  
+    cell.classList.add('cell');
     board.appendChild(cell);
   }
 }
 
 for (let i = 0; i < 16; i++) {
   const holdCell = document.createElement('div');
-  holdCell.classList.add('cell'); 
+  holdCell.classList.add('cell');
   hold.appendChild(holdCell);
 }
 
@@ -35,13 +35,13 @@ const COLORS = {
 const GHOST_COLOR = '#ffffff10';
 
 const SHAPES = {
-  I: [[[0,1],[1,1],[2,1],[3,1]], [[2,0],[2,1],[2,2],[2,3]], [[0,2],[1,2],[2,2],[3,2]], [[1,0],[1,1],[1,2],[1,3]]],
-  O: [[[0,0],[1,0],[0,1],[1,1]], [[0,0],[1,0],[0,1],[1,1]], [[0,0],[1,0],[0,1],[1,1]], [[0,0],[1,0],[0,1],[1,1]]],
-  T: [[[1,0],[0,1],[1,1],[2,1]], [[1,0],[0,1],[1,1],[1,2]], [[0,1],[1,1],[2,1],[1,2]], [[1,0],[1,1],[2,1],[1,2]]],
-  S: [[[1,0],[2,0],[0,1],[1,1]], [[1,0],[1,1],[2,1],[2,2]], [[1,1],[2,1],[0,2],[1,2]], [[0,0],[0,1],[1,1],[1,2]]],
-  Z: [[[0,0],[1,0],[1,1],[2,1]], [[2,0],[1,1],[2,1],[1,2]], [[0,1],[1,1],[1,2],[2,2]], [[1,0],[0,1],[1,1],[0,2]]],
-  J: [[[0,0],[0,1],[1,1],[2,1]], [[1,0],[2,0],[1,1],[1,2]], [[0,1],[1,1],[2,1],[2,2]], [[1,0],[1,1],[0,2],[1,2]]],
-  L: [[[2,0],[0,1],[1,1],[2,1]], [[1,0],[1,1],[1,2],[2,2]], [[0,1],[1,1],[2,1],[0,2]], [[0,0],[1,0],[1,1],[1,2]]]
+  I: [[[0, 1], [1, 1], [2, 1], [3, 1]], [[2, 0], [2, 1], [2, 2], [2, 3]], [[0, 2], [1, 2], [2, 2], [3, 2]], [[1, 0], [1, 1], [1, 2], [1, 3]]],
+  O: [[[0, 0], [1, 0], [0, 1], [1, 1]], [[0, 0], [1, 0], [0, 1], [1, 1]], [[0, 0], [1, 0], [0, 1], [1, 1]], [[0, 0], [1, 0], [0, 1], [1, 1]]],
+  T: [[[1, 0], [0, 1], [1, 1], [2, 1]], [[1, 0], [0, 1], [1, 1], [1, 2]], [[0, 1], [1, 1], [2, 1], [1, 2]], [[1, 0], [1, 1], [2, 1], [1, 2]]],
+  S: [[[1, 0], [2, 0], [0, 1], [1, 1]], [[1, 0], [1, 1], [2, 1], [2, 2]], [[1, 1], [2, 1], [0, 2], [1, 2]], [[0, 0], [0, 1], [1, 1], [1, 2]]],
+  Z: [[[0, 0], [1, 0], [1, 1], [2, 1]], [[2, 0], [1, 1], [2, 1], [1, 2]], [[0, 1], [1, 1], [1, 2], [2, 2]], [[1, 0], [0, 1], [1, 1], [0, 2]]],
+  J: [[[0, 0], [0, 1], [1, 1], [2, 1]], [[1, 0], [2, 0], [1, 1], [1, 2]], [[0, 1], [1, 1], [2, 1], [2, 2]], [[1, 0], [1, 1], [0, 2], [1, 2]]],
+  L: [[[2, 0], [0, 1], [1, 1], [2, 1]], [[1, 0], [1, 1], [1, 2], [2, 2]], [[0, 1], [1, 1], [2, 1], [0, 2]], [[0, 0], [1, 0], [1, 1], [1, 2]]]
 };
 
 let state = {
@@ -58,7 +58,7 @@ let state = {
 };
 
 function bag() {
-  const pieces = ['I','O','T','S','Z','J','L'];
+  const pieces = ['I', 'O', 'T', 'S', 'Z', 'J', 'L'];
   const shuffled = [];
 
   while (pieces.length) {
@@ -141,7 +141,6 @@ function getGhostY() {
   state.active.y = ghostY;
   return finalY;
 }
-
 function render() {
   if (state.over) return;
 
@@ -180,9 +179,17 @@ function renderNext() {
 
     const shape = SHAPES[type][0];
     const cells = nextPreviews[i];
-
+    let m = 0
+    let p = 0
     shape.forEach(([dx, dy]) => {
-      const index = dy * 4 + dx;
+      if (type != "I") {
+        m= 1
+      }
+      if (type == "O") {
+        p=1
+      }
+      const index = (dy+1) * 4 + dx + p ;
+      
       if (index >= 0 && index < cells.length) {
         cells[index].style.backgroundColor = COLORS[type];
       }
@@ -230,6 +237,12 @@ function lockPiece() {
   clearLines();
   spawnPiece();
 }
+function reset() {
+  state.grid.forEach(row => row.fill(0));
+  state.nextQ.length = 0
+  state.score = 0
+
+}
 
 function clearLines() {
   for (let y = row - 1; y >= 0; y--) {
@@ -274,7 +287,7 @@ document.addEventListener('keydown', (e) => {
     e.preventDefault();
   }
 
-  switch(e.key) {
+  switch (e.key) {
     case 'ArrowLeft':
     case 'a':
     case 'A':
@@ -294,7 +307,7 @@ document.addEventListener('keydown', (e) => {
       else lockPiece();
       break;
 
-    case 'ArrowUp': 
+    case 'ArrowUp':
     case 'w':
     case 'W':
       let newRot = (state.active.rotation + 1) % 4;
