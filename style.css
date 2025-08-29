@@ -7,13 +7,40 @@
 }
 
 body {
-  background-image: url("/Assets/bg.png");
+  position: relative;
+  background-color: #1a1a1a;
   color: #CFCFCF;
   font-family: Arial, sans-serif;
   display: grid;
   place-items: center;
   min-height: 100vh;
   padding: 20px;
+  overflow: hidden;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 200%;
+  height: 200%;
+  background-image: 
+    linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px);
+  background-size: 30px 30px;
+  animation: scrollGrid 40s linear infinite;
+  z-index: -1;
+  pointer-events: none;
+}
+
+@keyframes scrollGrid {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 1000px 1000px;
+  }
 }
 
 #game-container {
