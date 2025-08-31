@@ -23,13 +23,13 @@ const boardCells = Array.from(board.children);
 const holdCells = Array.from(hold.children);
 
 const COLORS = {
-  I: "#6ec1e4",
-  O: "#f7d06b",
-  T: "#c38ddb",
-  S: "#85d18d",
-  Z: "#f28b82",
-  J: "#8ecae6",
-  L: "#f9bc60"
+  I: "#00c3ff",
+  O: "#ffd500",
+  T: "#ff3b30",
+  S: "#4cd964",
+  Z: "#ff9f0a",
+  J: "#5856d6",
+  L: "#af52de"
 };
 
 const GHOST_COLOR = '#ffffff10';
@@ -42,19 +42,6 @@ const SHAPES = {
   Z: [[[0, 0], [1, 0], [1, 1], [2, 1]], [[2, 0], [1, 1], [2, 1], [1, 2]], [[0, 1], [1, 1], [1, 2], [2, 2]], [[1, 0], [0, 1], [1, 1], [0, 2]]],
   J: [[[0, 0], [0, 1], [1, 1], [2, 1]], [[1, 0], [2, 0], [1, 1], [1, 2]], [[0, 1], [1, 1], [2, 1], [2, 2]], [[1, 0], [1, 1], [0, 2], [1, 2]]],
   L: [[[2, 0], [0, 1], [1, 1], [2, 1]], [[1, 0], [1, 1], [1, 2], [2, 2]], [[0, 1], [1, 1], [2, 1], [0, 2]], [[0, 0], [1, 0], [1, 1], [1, 2]]]
-};
-
-let state = {
-  grid: Array.from({ length: row }, () => Array(colum).fill(0)),
-  active: null,
-  nextQ: [],
-  hold: null,
-  canHold: true,
-  score: 0,
-  lines: 0,
-  level: 1,
-  over: false,
-  paused: false
 };
 
 function bag() {
@@ -70,7 +57,25 @@ function bag() {
   return shuffled;
 }
 
+
+let state = {
+  grid: Array.from({ length: row }, () => Array(colum).fill(0)),
+  active: null,
+  nextQ: bag(),
+  hold: null,
+  canHold: true,
+  score: 0,
+  lines: 0,
+  level: 1,
+  dropInerval: 700,
+  over: false,
+  paused: false
+};
+
+
 const nextPreviews = [];
+
+
 for (let i = 0; i < 5; i++) {
   const preview = document.createElement('div');
   preview.classList.add('next-preview');
@@ -183,13 +188,13 @@ function renderNext() {
     let p = 0
     shape.forEach(([dx, dy]) => {
       if (type != "I") {
-        m= 1
+        m = 1
       }
       if (type == "O") {
-        p=1
+        p = 1
       }
-      const index = (dy+1) * 4 + dx + p ;
-      
+      const index = (dy + 1) * 4 + dx + p;
+
       if (index >= 0 && index < cells.length) {
         cells[index].style.backgroundColor = COLORS[type];
       }
@@ -229,7 +234,6 @@ function lockPiece() {
       state.grid[y][x] = state.active.type;
     } else {
       state.over = true;
-      clearInterval(loopid);
       alert("Game Over");
     }
   });
@@ -271,16 +275,38 @@ function hardDrop() {
     container.classList.remove("hit-drop-animation");
   }, { once: true });
 }
+let dt = 0;
+let lasttime = 0;
 
-function gameLoop() {
-  if (state.over || state.paused) return;
-  if (isValidMove(0, 1, state.active.rotation)) {
-    state.active.y += 1;
-  } else {
-    lockPiece();
+
+function loop(timestap) {
+  if (state.over || state.paused) {
+    return
   }
-  render();
+if (!state.active) {
+  spawnPiece()
 }
+  if (!lasttime) {
+    lasttime = timestap;
+  }
+  dt += timestap - lasttime;
+  lasttime = timestap
+  if (dt >= state.dropInerval) {
+    if (isValidMove(0, 1, state.active.rotation)) {
+      state.active.y += 1
+    } else {
+      lockPiece();
+    }
+    dt = 0
+  }
+  render()
+  if (!state.over && !state.paused) {
+    requestAnimationFrame(loop)
+  }
+
+}
+
+
 
 document.addEventListener('keydown', (e) => {
   if ([" ", "ArrowDown", "ArrowUp", "ArrowLeft", "ArrowRight"].includes(e.key)) {
@@ -336,11 +362,10 @@ document.getElementById("restart-button").addEventListener("click", () => {
   location.reload();
 });
 
+requestAnimationFrame(loop)
+//state.nextQ = bag();
+//spawnPiece();
+//renderHold();
+//renderNext();
+//render();
 
-state.nextQ = bag();
-spawnPiece();
-renderHold();
-renderNext();
-render();
-
-const loopid = setInterval(gameLoop, 700);
