@@ -67,7 +67,7 @@ let state = {
   score: 0,
   lines: 0,
   level: 1,
-  dropInerval: 700,
+  dropInterval: 700,
   over: false,
   paused: false
 };
@@ -291,7 +291,7 @@ if (!state.active) {
   }
   dt += timestap - lasttime;
   lasttime = timestap
-  if (dt >= state.dropInerval) {
+  if (dt >= state.dropInterval) {
     if (isValidMove(0, 1, state.active.rotation)) {
       state.active.y += 1
     } else {
@@ -300,9 +300,9 @@ if (!state.active) {
     dt = 0
   }
   render()
-  if (!state.over && !state.paused) {
+ 
     requestAnimationFrame(loop)
-  }
+  
 
 }
 
@@ -317,18 +317,30 @@ document.addEventListener('keydown', (e) => {
     case 'ArrowLeft':
     case 'a':
     case 'A':
+      if (state.over || state.paused) {
+        break
+      }
+
       if (isValidMove(-1, 0, state.active.rotation)) state.active.x -= 1;
       break;
 
     case 'ArrowRight':
     case 'd':
     case 'D':
+      if (state.over || state.paused) {
+        break
+      }
+
       if (isValidMove(1, 0, state.active.rotation)) state.active.x += 1;
       break;
 
     case 'ArrowDown':
     case 's':
     case 'S':
+      if (state.over || state.paused) {
+        break
+      }
+
       if (isValidMove(0, 1, state.active.rotation)) state.active.y += 1;
       else lockPiece();
       break;
@@ -336,6 +348,10 @@ document.addEventListener('keydown', (e) => {
     case 'ArrowUp':
     case 'w':
     case 'W':
+      if (state.over || state.paused) {
+        break
+      }
+
       let newRot = (state.active.rotation + 1) % 4;
       if (isValidMove(0, 0, newRot)) {
         state.active.rotation = newRot;
@@ -343,16 +359,29 @@ document.addEventListener('keydown', (e) => {
       break;
 
     case ' ':
+      if (state.over || state.paused) {
+        break
+      }
+
       hardDrop();
       break;
 
     case 'Shift':
+      if (state.over || state.paused) {
+        break
+      }
+
       holdPiece();
       break;
 
     case 'r':
     case 'R':
       location.reload();
+
+      case 'p':
+        case 'P':
+          state.paused = !state.paused;
+          requestAnimationFrame(loop)
   }
 
   render();
@@ -368,4 +397,3 @@ requestAnimationFrame(loop)
 //renderHold();
 //renderNext();
 //render();
-
