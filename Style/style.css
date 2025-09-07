@@ -83,6 +83,40 @@ body::before {
   justify-content: center;
   align-items: center;
 }
+#paused {
+  width: 120px;
+  height: 40px;
+  font-size: 12px;
+  font-family: "Press Start 2P", system-ui;
+  color: #CFCFCF;
+  background-color: #212121;
+  border: 2px solid #CFCFCF;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: background-color 0.2s, transform 0.1s;
+}
+
+#lines {
+  font-size: 24px;
+  font-weight: bold;
+  border: 2px solid #CFCFCF;
+  width: 120px;
+  height: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#level {
+  font-size: 24px;
+  font-weight: bold;
+  border: 2px solid #CFCFCF;
+  width: 120px;
+  height: 60px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 
 #hold {
   display: grid;

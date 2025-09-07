@@ -1,7 +1,12 @@
 const board = document.getElementById("board");
 const next = document.getElementById("next");
 const hold = document.getElementById("hold");
-
+const container = document.getElementById("game-container");
+const Score = document.getElementById('score')
+const RestartButton = document.getElementById("restart-button")
+const Lines = document.getElementById("lines")
+const Level = document.getElementById("level")
+const Paused = document.getElementById("paused")
 const colum = 10;
 const row = 20;
 
@@ -247,28 +252,37 @@ function reset() {
   state.score = 0
 
 }
-
+let h = 0
 function clearLines() {
   for (let y = row - 1; y >= 0; y--) {
     if (state.grid[y].every(cell => cell !== 0)) {
       state.grid.splice(y, 1);
       state.grid.unshift(Array(colum).fill(0));
-      state.lines += 1;
-      state.score += 100;
+      h += 1;
+      state.lines+=1
       y++;
     }
   }
-  document.getElementById('score').textContent = state.score;
+  if (h>= 10) {
+    state.level+= h/10
+    h= h%10
+    if ((state.dropInterval - 60) >= 90) {
+      state.dropInterval-=60
+    }
+  } 
+  Score.textContent = state.score;
+  Lines.textContent = state.lines
+  Level.textContent = state.level
 }
 
 function hardDrop() {
   while (isValidMove(0, 1, state.active.rotation)) {
     state.active.y += 1;
+    state.score+= 2
   }
   lockPiece();
   render();
 
-  const container = document.getElementById("game-container");
   container.classList.add("hit-drop-animation");
 
   container.addEventListener("animationend", () => {
@@ -283,9 +297,9 @@ function loop(timestap) {
   if (state.over || state.paused) {
     return
   }
-if (!state.active) {
-  spawnPiece()
-}
+  if (!state.active) {
+    spawnPiece()
+  }
   if (!lasttime) {
     lasttime = timestap;
   }
@@ -293,6 +307,8 @@ if (!state.active) {
   lasttime = timestap
   if (dt >= state.dropInterval) {
     if (isValidMove(0, 1, state.active.rotation)) {
+      console.log(state.dropInterval);
+      
       state.active.y += 1
     } else {
       lockPiece();
@@ -300,9 +316,9 @@ if (!state.active) {
     dt = 0
   }
   render()
- 
-    requestAnimationFrame(loop)
-  
+
+  requestAnimationFrame(loop)
+
 
 }
 
@@ -341,8 +357,8 @@ document.addEventListener('keydown', (e) => {
         break
       }
 
-      if (isValidMove(0, 1, state.active.rotation)) state.active.y += 1;
-      else lockPiece();
+      if (isValidMove(0, 1, state.active.rotation)) {state.score+= 1; state.active.y += 1 ;
+      }else lockPiece();
       break;
 
     case 'ArrowUp':
@@ -378,16 +394,21 @@ document.addEventListener('keydown', (e) => {
     case 'R':
       location.reload();
 
-      case 'p':
-        case 'P':
-          state.paused = !state.paused;
-          requestAnimationFrame(loop)
+    case 'p':
+    case 'P':
+      state.paused = !state.paused
+  Paused.textContent = state.paused ? "Continue"  : "pause" 
+      requestAnimationFrame(loop)
   }
 
   render();
 });
-
-document.getElementById("restart-button").addEventListener("click", () => {
+Paused.addEventListener("click", () => {
+  state.paused = !state.paused
+  Paused.textContent = state.paused ? "Continue"  : "pause" 
+  
+  requestAnimationFrame(loop)}) 
+RestartButton.addEventListener("click", () => {
   location.reload();
 });
 
