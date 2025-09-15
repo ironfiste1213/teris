@@ -7,6 +7,8 @@ const RestartButton = document.getElementById("restart-button")
 const Lines = document.getElementById("lines")
 const Level = document.getElementById("level")
 const Paused = document.getElementById("paused")
+const Activepiece = document.getElementById("active-piece-layer")
+const GhostPice = document.getElementById("ghost-piece-layer")
 const colum = 10;
 const row = 20;
 
@@ -77,9 +79,7 @@ let state = {
   paused: false
 };
 
-
 const nextPreviews = [];
-
 
 for (let i = 0; i < 5; i++) {
   const preview = document.createElement('div');
@@ -95,29 +95,55 @@ for (let i = 0; i < 5; i++) {
 
 function spawnPiece() {
   if (state.over) return;
-
   if (state.nextQ.length < 7) {
     state.nextQ = state.nextQ.concat(bag());
   }
-
   const type = state.nextQ.shift();
-
   state.active = {
     type: type,
     x: 3,
     y: -1,
     rotation: 0
   };
-
+  clearLayer(Activepiece);
+  clearLayer(GhostPice);
+  const shape = SHAPES[state.active.type][state.active.rotation];
+  const cellSize = 30; 
+  const activeX = state.active.x * cellSize;
+  const activeY = state.active.y * cellSize;
+  Activepiece.style.transform = `translate(${activeX}px, ${activeY}px)`;
+  createPieceVisuals(Activepiece, shape, state.active.type, 1.0); // Full opacity
+  const ghostY = getGhostY();
+  GhostPice.style.transform = `translate(${activeX}px, ${ghostY * cellSize}px)`;
+  createPieceVisuals(GhostPice, shape, state.active.type, 0.3); // 30% opacity
   state.canHold = true;
   renderNext();
 }
 
+function createPieceVisuals(layer, shape, pieceType, opacity) {
+  for (let i = 0; i < 4; i++) {
+    const [dx, dy] = shape[i];
+    const block = document.createElement("div");
+    block.style.backgroundColor = COLORS[pieceType];
+    block.classList.add("piece-block");
+    block.style.opacity = opacity;
+    block.style.left = `${dx * 30}px`;
+    block.style.top = `${dy * 30}px`;
+    layer.appendChild(block);
+  }
+}
+
+function clearLayer(layer) {
+  while (layer.firstChild) {
+    layer.removeChild(layer.firstChild);
+  }
+}
+
 function holdPiece() {
   if (!state.canHold) return;
-
   const current = state.active.type;
-
+  clearLayer(Activepiece);
+  clearLayer(GhostPice);
   if (state.hold === null) {
     state.hold = current;
     spawnPiece();
@@ -126,11 +152,17 @@ function holdPiece() {
     state.active.x = 3;
     state.active.y = -1;
     state.active.rotation = 0;
+    const shape = SHAPES[state.active.type][state.active.rotation];
+    const activeX = state.active.x * 30;
+    const activeY = state.active.y * 30;
+    Activepiece.style.transform = `translate(${activeX}px, ${activeY}px)`;
+    createPieceVisuals(Activepiece, shape, state.active.type, 1.0);
+    const ghostY = getGhostY();
+    GhostPice.style.transform = `translate(${activeX}px, ${ghostY * 30}px)`;
+    createPieceVisuals(GhostPice, shape, state.active.type, 0.3);
   }
-
   state.canHold = false;
   renderHold();
-  render();
 }
 
 function renderGrid() {
@@ -151,31 +183,16 @@ function getGhostY() {
   state.active.y = ghostY;
   return finalY;
 }
+
 function render() {
   if (state.over) return;
-
   renderGrid();
-
-  const shape = SHAPES[state.active.type][state.active.rotation];
+  const activeX = state.active.x * 30;
+  const activeY = state.active.y * 30;
+  Activepiece.style.transform = `translate(${activeX}px, ${activeY}px)`;
   const ghostY = getGhostY();
-
-  shape.forEach(([dx, dy]) => {
-    const x = state.active.x + dx;
-    const y = ghostY + dy;
-    if (x >= 0 && x < colum && y >= 0 && y < row) {
-      const index = y * colum + x;
-      boardCells[index].style.backgroundColor = GHOST_COLOR;
-    }
-  });
-
-  shape.forEach(([dx, dy]) => {
-    const x = state.active.x + dx;
-    const y = state.active.y + dy;
-    if (x >= 0 && x < colum && y >= 0 && y < row) {
-      const index = y * colum + x;
-      boardCells[index].style.backgroundColor = COLORS[state.active.type];
-    }
-  });
+  const ghostX = state.active.x * 30;
+  GhostPice.style.transform = `translate(${ghostX}px, ${ghostY * 30}px)`;
 }
 
 function renderNext() {
@@ -259,17 +276,17 @@ function clearLines() {
       state.grid.splice(y, 1);
       state.grid.unshift(Array(colum).fill(0));
       h += 1;
-      state.lines+=1
+      state.lines += 1
       y++;
     }
   }
-  if (h>= 10) {
-    state.level+= h/10
-    h= h%10
+  if (h >= 10) {
+    state.level += h / 10
+    h = h % 10
     if ((state.dropInterval - 60) >= 90) {
-      state.dropInterval-=60
+      state.dropInterval -= 60
     }
-  } 
+  }
   Score.textContent = state.score;
   Lines.textContent = state.lines
   Level.textContent = state.level
@@ -278,7 +295,7 @@ function clearLines() {
 function hardDrop() {
   while (isValidMove(0, 1, state.active.rotation)) {
     state.active.y += 1;
-    state.score+= 2
+    state.score += 2
   }
   lockPiece();
   render();
@@ -308,7 +325,7 @@ function loop(timestap) {
   if (dt >= state.dropInterval) {
     if (isValidMove(0, 1, state.active.rotation)) {
       console.log(state.dropInterval);
-      
+
       state.active.y += 1
     } else {
       lockPiece();
@@ -357,8 +374,9 @@ document.addEventListener('keydown', (e) => {
         break
       }
 
-      if (isValidMove(0, 1, state.active.rotation)) {state.score+= 1; state.active.y += 1 ;
-      }else lockPiece();
+      if (isValidMove(0, 1, state.active.rotation)) {
+        state.score += 1; state.active.y += 1;
+      } else lockPiece();
       break;
 
     case 'ArrowUp':
@@ -397,7 +415,7 @@ document.addEventListener('keydown', (e) => {
     case 'p':
     case 'P':
       state.paused = !state.paused
-  Paused.textContent = state.paused ? "Continue"  : "pause" 
+      Paused.textContent = state.paused ? "Continue" : "pause"
       requestAnimationFrame(loop)
   }
 
@@ -405,16 +423,12 @@ document.addEventListener('keydown', (e) => {
 });
 Paused.addEventListener("click", () => {
   state.paused = !state.paused
-  Paused.textContent = state.paused ? "Continue"  : "pause" 
-  
-  requestAnimationFrame(loop)}) 
+  Paused.textContent = state.paused ? "Continue" : "pause"
+
+  requestAnimationFrame(loop)
+})
 RestartButton.addEventListener("click", () => {
   location.reload();
 });
 
 requestAnimationFrame(loop)
-//state.nextQ = bag();
-//spawnPiece();
-//renderHold();
-//renderNext();
-//render();
