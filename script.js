@@ -2,32 +2,18 @@ const board = document.getElementById("board");
 const next = document.getElementById("next");
 const hold = document.getElementById("hold");
 const container = document.getElementById("game-container");
-const Score = document.getElementById('score')
-const RestartButton = document.getElementById("restart-button")
-const Lines = document.getElementById("lines")
-const Level = document.getElementById("level")
-const Paused = document.getElementById("paused")
-const Activepiece = document.getElementById("active-piece-layer")
-const GhostPice = document.getElementById("ghost-piece-layer")
+const Score = document.getElementById('score');
+const RestartButton = document.getElementById("restart-button");
+const Lines = document.getElementById("lines");
+const Level = document.getElementById("level");
+const Paused = document.getElementById("paused");
+const Activepiece = document.getElementById("active-piece-layer");
+const GhostPice = document.getElementById("ghost-piece-layer");
+const Timer = document.getElementById("timer");
+const lives = document.getElementById("lives");
+
 const colum = 10;
 const row = 20;
-
-for (let i = 0; i < row; i++) {
-  for (let j = 0; j < colum; j++) {
-    const cell = document.createElement('div');
-    cell.classList.add('cell');
-    board.appendChild(cell);
-  }
-}
-
-for (let i = 0; i < 16; i++) {
-  const holdCell = document.createElement('div');
-  holdCell.classList.add('cell');
-  hold.appendChild(holdCell);
-}
-
-const boardCells = Array.from(board.children);
-const holdCells = Array.from(hold.children);
 
 const COLORS = {
   I: "#00c3ff",
@@ -39,8 +25,6 @@ const COLORS = {
   L: "#af52de"
 };
 
-const GHOST_COLOR = '#ffffff10';
-
 const SHAPES = {
   I: [[[0, 1], [1, 1], [2, 1], [3, 1]], [[2, 0], [2, 1], [2, 2], [2, 3]], [[0, 2], [1, 2], [2, 2], [3, 2]], [[1, 0], [1, 1], [1, 2], [1, 3]]],
   O: [[[0, 0], [1, 0], [0, 1], [1, 1]], [[0, 0], [1, 0], [0, 1], [1, 1]], [[0, 0], [1, 0], [0, 1], [1, 1]], [[0, 0], [1, 0], [0, 1], [1, 1]]],
@@ -50,6 +34,59 @@ const SHAPES = {
   J: [[[0, 0], [0, 1], [1, 1], [2, 1]], [[1, 0], [2, 0], [1, 1], [1, 2]], [[0, 1], [1, 1], [2, 1], [2, 2]], [[1, 0], [1, 1], [0, 2], [1, 2]]],
   L: [[[2, 0], [0, 1], [1, 1], [2, 1]], [[1, 0], [1, 1], [1, 2], [2, 2]], [[0, 1], [1, 1], [2, 1], [0, 2]], [[0, 0], [1, 0], [1, 1], [1, 2]]]
 };
+
+let state = {
+  grid: Array.from({ length: row }, () => Array(colum).fill(0)),
+  active: null,
+  nextQ: bag(),
+  hold: null,
+  canHold: true,
+  score: 0,
+  lines: 0,
+  level: 1,
+  dropInterval: 700,
+  over: false,
+  paused: false,
+  startTime: Date.now(),
+  gameTime: 0,
+};
+
+let dt = 0;
+let lasttime = 0;
+let h = 0;
+
+// Initialize Board
+for (let i = 0; i < row; i++) {
+  for (let j = 0; j < colum; j++) {
+    const cell = document.createElement('div');
+    cell.classList.add('cell');
+    board.appendChild(cell);
+  }
+}
+
+// Initialize Hold Area
+for (let i = 0; i < 16; i++) {
+  const holdCell = document.createElement('div');
+  holdCell.classList.add('cell');
+  hold.appendChild(holdCell);
+}
+
+// Initialize Next Previews
+const nextPreviews = [];
+for (let i = 0; i < 5; i++) {
+  const preview = document.createElement('div');
+  preview.classList.add('next-preview');
+  for (let j = 0; j < 16; j++) {
+    const cell = document.createElement('div');
+    cell.classList.add('cell');
+    preview.appendChild(cell);
+  }
+  next.appendChild(preview);
+  nextPreviews.push(Array.from(preview.children));
+}
+
+const boardCells = Array.from(board.children);
+const holdCells = Array.from(hold.children);
 
 function bag() {
   const pieces = ['I', 'O', 'T', 'S', 'Z', 'J', 'L'];
@@ -64,33 +101,45 @@ function bag() {
   return shuffled;
 }
 
-
-let state = {
-  grid: Array.from({ length: row }, () => Array(colum).fill(0)),
-  active: null,
-  nextQ: bag(),
-  hold: null,
-  canHold: true,
-  score: 0,
-  lines: 0,
-  level: 1,
-  dropInterval: 700,
-  over: false,
-  paused: false
-};
-
-const nextPreviews = [];
-
-for (let i = 0; i < 5; i++) {
-  const preview = document.createElement('div');
-  preview.classList.add('next-preview');
-  for (let j = 0; j < 16; j++) {
-    const cell = document.createElement('div');
-    cell.classList.add('cell');
-    preview.appendChild(cell);
+function clearLayer(layer) {
+  while (layer.firstChild) {
+    layer.removeChild(layer.firstChild);
   }
-  next.appendChild(preview);
-  nextPreviews.push(Array.from(preview.children));
+}
+
+function createPieceVisuals(layer, shape, pieceType, opacity) {
+  for (let i = 0; i < 4; i++) {
+    const [dx, dy] = shape[i];
+    const block = document.createElement("div");
+    block.style.backgroundColor = COLORS[pieceType];
+    block.classList.add("piece-block");
+    block.style.opacity = opacity;
+    block.style.left = `${dx * 30}px`;
+    block.style.top = `${dy * 30}px`;
+    layer.appendChild(block);
+  }
+}
+
+function isValidMove(xOffset, yOffset, rotation) {
+  const shape = SHAPES[state.active.type][rotation];
+  for (const [dx, dy] of shape) {
+    const x = state.active.x + dx + xOffset;
+    const y = state.active.y + dy + yOffset;
+    if (x < 0 || x >= colum || y >= row) return false;
+    if (y >= 0 && state.grid[y][x] !== 0) return false;
+  }
+  return true;
+}
+
+function getGhostY() {
+  if (!state.active) {
+    return 0;
+  }
+  let ghostY = 0;
+  while (isValidMove(0, ghostY + 1, state.active.rotation)) {
+    ghostY += 1;
+  }
+  return ghostY + state.active.y;
 }
 
 function spawnPiece() {
@@ -108,35 +157,16 @@ function spawnPiece() {
   clearLayer(Activepiece);
   clearLayer(GhostPice);
   const shape = SHAPES[state.active.type][state.active.rotation];
-  const cellSize = 30; 
+  const cellSize = 30;
   const activeX = state.active.x * cellSize;
   const activeY = state.active.y * cellSize;
   Activepiece.style.transform = `translate(${activeX}px, ${activeY}px)`;
-  createPieceVisuals(Activepiece, shape, state.active.type, 1.0); // Full opacity
+  createPieceVisuals(Activepiece, shape, state.active.type, 1.0);
   const ghostY = getGhostY();
   GhostPice.style.transform = `translate(${activeX}px, ${ghostY * cellSize}px)`;
-  createPieceVisuals(GhostPice, shape, state.active.type, 0.3); // 30% opacity
+  createPieceVisuals(GhostPice, shape, state.active.type, 0.3);
   state.canHold = true;
   renderNext();
-}
-
-function createPieceVisuals(layer, shape, pieceType, opacity) {
-  for (let i = 0; i < 4; i++) {
-    const [dx, dy] = shape[i];
-    const block = document.createElement("div");
-    block.style.backgroundColor = COLORS[pieceType];
-    block.classList.add("piece-block");
-    block.style.opacity = opacity;
-    block.style.left = `${dx * 30}px`;
-    block.style.top = `${dy * 30}px`;
-    layer.appendChild(block);
-  }
-}
-
-function clearLayer(layer) {
-  while (layer.firstChild) {
-    layer.removeChild(layer.firstChild);
-  }
 }
 
 function holdPiece() {
@@ -165,6 +195,106 @@ function holdPiece() {
   renderHold();
 }
 
+function rotation() {
+  clearLayer(Activepiece);
+  clearLayer(GhostPice);
+  const shape = SHAPES[state.active.type][state.active.rotation];
+  createPieceVisuals(Activepiece, shape, state.active.type, 1.0);
+  createPieceVisuals(GhostPice, shape, state.active.type, 0.3);
+}
+
+function lockPiece() {
+  const shape = SHAPES[state.active.type][state.active.rotation];
+  shape.forEach(([dx, dy]) => {
+    const x = state.active.x + dx;
+    const y = state.active.y + dy;
+    if (y < 0) {
+      state.over = true;
+      return;
+    } else if (y < row) {
+      state.grid[y][x] = state.active.type;
+    }
+  });
+  
+  if (state.over) {
+    const currentLives = parseInt(lives.textContent);
+    if (currentLives > 1) {
+      // Lose a life and reset
+      lives.textContent = currentLives - 1;
+      state.grid.forEach(row => row.fill(0));
+      state.over = false;
+      renderGrid();
+      spawnPiece();
+      return;
+    }
+    return;
+  }
+  
+  clearLines();
+  renderGrid();
+  spawnPiece();
+}
+
+function hardDrop() {
+  while (isValidMove(0, 1, state.active.rotation)) {
+    state.active.y += 1;
+    state.score += 2;
+    Score.textContent = state.score;
+  }
+  lockPiece();
+  render();
+
+  container.classList.add("hit-drop-animation");
+  container.addEventListener("animationend", () => {
+    container.classList.remove("hit-drop-animation");
+  }, { once: true });
+}
+
+function clearLines() {
+  let lines = 0;
+  for (let y = row - 1; y >= 0; y--) {
+    if (state.grid[y].every(cell => cell !== 0)) {
+      state.grid.splice(y, 1);
+      state.grid.unshift(Array(colum).fill(0));
+      lines += 1;
+      h += 1;
+      state.lines += 1;
+      y++;
+    }
+  }
+  updateScore(lines);
+  if (h >= 10) {
+    state.level += Math.floor(h / 10);
+    h = h % 10;
+    state.dropInterval = Math.max(100, 700 - (state.level - 1) * 60);
+  }
+  Score.textContent = state.score;
+  Lines.textContent = state.lines;
+  Level.textContent = state.level;
+}
+
+function updateScore(linesCleared) {
+  const basePoints = [0, 40, 100, 300, 1200];
+  state.score += basePoints[linesCleared] * state.level;
+}
+
+function updateTimer() {
+  if (!state.paused && !state.over) {
+    state.gameTime = Date.now() - state.startTime;
+    const minutes = Math.floor(state.gameTime / 60000);
+    const seconds = Math.floor((state.gameTime % 60000) / 1000);
+    Timer.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  }
+}
+
+function reset() {
+  state.grid.forEach(row => row.fill(0));
+  state.nextQ.length = 0;
+  state.score = 0;
+  state.startTime = Date.now();
+  state.gameTime = 0;
+}
+
 function renderGrid() {
   boardCells.forEach((cell, index) => {
     const x = index % colum;
@@ -174,19 +304,8 @@ function renderGrid() {
   });
 }
 
-function getGhostY() {
-  let ghostY = state.active.y;
-  while (isValidMove(0, 1, state.active.rotation)) {
-    state.active.y += 1;
-  }
-  const finalY = state.active.y;
-  state.active.y = ghostY;
-  return finalY;
-}
-
 function render() {
   if (state.over) return;
-  renderGrid();
   const activeX = state.active.x * 30;
   const activeY = state.active.y * 30;
   Activepiece.style.transform = `translate(${activeX}px, ${activeY}px)`;
@@ -206,14 +325,14 @@ function renderNext() {
 
     const shape = SHAPES[type][0];
     const cells = nextPreviews[i];
-    let m = 0
-    let p = 0
+    let m = 0;
+    let p = 0;
     shape.forEach(([dx, dy]) => {
       if (type != "I") {
-        m = 1
+        m = 1;
       }
       if (type == "O") {
-        p = 1
+        p = 1;
       }
       const index = (dy + 1) * 4 + dx + p;
 
@@ -236,110 +355,33 @@ function renderHold() {
   });
 }
 
-function isValidMove(xOffset, yOffset, rotation) {
-  const shape = SHAPES[state.active.type][rotation];
-  for (const [dx, dy] of shape) {
-    const x = state.active.x + dx + xOffset;
-    const y = state.active.y + dy + yOffset;
-    if (x < 0 || x >= colum || y >= row) return false;
-    if (y >= 0 && state.grid[y][x] !== 0) return false;
-  }
-  return true;
-}
-
-function lockPiece() {
-  const shape = SHAPES[state.active.type][state.active.rotation];
-  shape.forEach(([dx, dy]) => {
-    const x = state.active.x + dx;
-    const y = state.active.y + dy;
-    if (y >= 0) {
-      state.grid[y][x] = state.active.type;
-    } else {
-      state.over = true;
-      alert("Game Over");
-    }
-  });
-
-  clearLines();
-  spawnPiece();
-}
-function reset() {
-  state.grid.forEach(row => row.fill(0));
-  state.nextQ.length = 0
-  state.score = 0
-
-}
-let h = 0
-function clearLines() {
-  for (let y = row - 1; y >= 0; y--) {
-    if (state.grid[y].every(cell => cell !== 0)) {
-      state.grid.splice(y, 1);
-      state.grid.unshift(Array(colum).fill(0));
-      h += 1;
-      state.lines += 1
-      y++;
-    }
-  }
-  if (h >= 10) {
-    state.level += h / 10
-    h = h % 10
-    if ((state.dropInterval - 60) >= 90) {
-      state.dropInterval -= 60
-    }
-  }
-  Score.textContent = state.score;
-  Lines.textContent = state.lines
-  Level.textContent = state.level
-}
-
-function hardDrop() {
-  while (isValidMove(0, 1, state.active.rotation)) {
-    state.active.y += 1;
-    state.score += 2
-  }
-  lockPiece();
-  render();
-
-  container.classList.add("hit-drop-animation");
-
-  container.addEventListener("animationend", () => {
-    container.classList.remove("hit-drop-animation");
-  }, { once: true });
-}
-let dt = 0;
-let lasttime = 0;
-
-
 function loop(timestap) {
   if (state.over || state.paused) {
-    return
+    return;
   }
+  updateTimer();
   if (!state.active) {
-    spawnPiece()
+    spawnPiece();
   }
   if (!lasttime) {
     lasttime = timestap;
   }
   dt += timestap - lasttime;
-  lasttime = timestap
+  lasttime = timestap;
   if (dt >= state.dropInterval) {
     if (isValidMove(0, 1, state.active.rotation)) {
       console.log(state.dropInterval);
-
-      state.active.y += 1
+      state.active.y += 1;
+      render();
     } else {
       lockPiece();
     }
-    dt = 0
+    dt = 0;
   }
-  render()
+ 
 
-  requestAnimationFrame(loop)
-
-
+  requestAnimationFrame(loop);
 }
-
-
 
 document.addEventListener('keydown', (e) => {
   if ([" ", "ArrowDown", "ArrowUp", "ArrowLeft", "ArrowRight"].includes(e.key)) {
@@ -350,85 +392,84 @@ document.addEventListener('keydown', (e) => {
     case 'ArrowLeft':
     case 'a':
     case 'A':
-      if (state.over || state.paused) {
-        break
+      if (state.over || state.paused || !state.active) {
+        break;
       }
-
       if (isValidMove(-1, 0, state.active.rotation)) state.active.x -= 1;
       break;
 
     case 'ArrowRight':
     case 'd':
     case 'D':
-      if (state.over || state.paused) {
-        break
+      if (state.over || state.paused || !state.active) {
+        break;
       }
-
       if (isValidMove(1, 0, state.active.rotation)) state.active.x += 1;
       break;
 
     case 'ArrowDown':
     case 's':
     case 'S':
-      if (state.over || state.paused) {
-        break
+      if (state.over || state.paused || !state.active) {
+        break;
       }
-
       if (isValidMove(0, 1, state.active.rotation)) {
-        state.score += 1; state.active.y += 1;
+        state.score += 1;
+        state.active.y += 1;
+        Score.textContent = state.score;
       } else lockPiece();
       break;
 
     case 'ArrowUp':
     case 'w':
     case 'W':
-      if (state.over || state.paused) {
-        break
+      if (state.over || state.paused || !state.active) {
+        break;
       }
-
       let newRot = (state.active.rotation + 1) % 4;
       if (isValidMove(0, 0, newRot)) {
         state.active.rotation = newRot;
+        rotation();
       }
       break;
 
     case ' ':
-      if (state.over || state.paused) {
-        break
+      if (state.over || state.paused || !state.active) {
+        break;
       }
-
       hardDrop();
       break;
 
     case 'Shift':
-      if (state.over || state.paused) {
-        break
+      if (state.over || state.paused || !state.active) {
+        break;
       }
-
       holdPiece();
       break;
 
     case 'r':
     case 'R':
       location.reload();
+      break;
 
     case 'p':
     case 'P':
-      state.paused = !state.paused
-      Paused.textContent = state.paused ? "Continue" : "pause"
-      requestAnimationFrame(loop)
+      state.paused = !state.paused;
+      Paused.textContent = state.paused ? "Continue" : "pause";
+      requestAnimationFrame(loop);
   }
 
   render();
 });
-Paused.addEventListener("click", () => {
-  state.paused = !state.paused
-  Paused.textContent = state.paused ? "Continue" : "pause"
 
-  requestAnimationFrame(loop)
-})
+Paused.addEventListener("click", () => {
+  state.paused = !state.paused;
+  Paused.textContent = state.paused ? "Continue" : "pause";
+  requestAnimationFrame(loop);
+});
+
 RestartButton.addEventListener("click", () => {
   location.reload();
 });
 
-requestAnimationFrame(loop)
+requestAnimationFrame(loop);

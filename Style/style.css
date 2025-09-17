@@ -43,6 +43,12 @@ body::before {
   }
 }
 
+@keyframes hitDrop {
+  0%   { transform: translateY(0); }
+  50%  { transform: translateY(10px); }
+  100% { transform: translateY(0); }
+}
+
 #game-container {
   display: grid;
   grid-template-columns: 140px auto 140px;
@@ -64,22 +70,6 @@ body::before {
   background: #212121;
   border: 2px solid #CFCFCF;
 }
-#lives {
-  font-size: 24px;
-  font-weight: bold;
-  border: 2px solid #CFCFCF;
-  width: 120px;
-  height: 60px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-.cell {
-  width: 30px;
-  height: 30px;
-  border: 1px solid #333;
-  background: #212121;
-}
 
 #sidebar-left {
   display: flex;
@@ -88,7 +78,43 @@ body::before {
   align-items: center;
 }
 
-#score {
+#sidebar-right {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-items: flex-start;
+  width: 140px;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.stat-row h2 {
+  margin: 0;
+  font-size: 12px;
+}
+
+h2 {
+  margin: 4px;
+}
+
+.cell {
+  width: 30px;
+  height: 30px;
+  border: 1px solid #333;
+  background: #212121;
+}
+
+#score, #lines, #level, #timer, #lives {
   font-size: 24px;
   font-weight: bold;
   border: 2px solid #CFCFCF;
@@ -98,7 +124,8 @@ body::before {
   justify-content: center;
   align-items: center;
 }
-#paused {
+
+#paused, #restart-button {
   width: 120px;
   height: 40px;
   font-size: 12px;
@@ -111,26 +138,12 @@ body::before {
   transition: background-color 0.2s, transform 0.1s;
 }
 
-#lines {
-  font-size: 24px;
-  font-weight: bold;
-  border: 2px solid #CFCFCF;
-  width: 120px;
-  height: 60px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+#restart-button:hover {
+  background-color: #333;
 }
 
-#level {
-  font-size: 24px;
-  font-weight: bold;
-  border: 2px solid #CFCFCF;
-  width: 120px;
-  height: 60px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+#restart-button:active {
+  transform: scale(0.95);
 }
 
 #hold {
@@ -151,14 +164,6 @@ body::before {
   border: 1px solid #333;
   background: #212121;
   border-radius: 2px;
-}
-
-#sidebar-right {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  align-items: flex-start;
-  width: 140px;
 }
 
 #next {
@@ -191,41 +196,8 @@ body::before {
   border-radius: 2px;
 }
 
-.section {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-@keyframes hitDrop {
-  0%   { transform: translateY(0); }
-  50%  { transform: translateY(10px); }
-  100% { transform: translateY(0); }
-}
-
 .hit-drop-animation {
   animation: hitDrop 0.3s ease forwards;
-}
-
-#restart-button {
-  width: 120px;
-  height: 40px;
-  font-size: 12px;
-  font-family: "Press Start 2P", system-ui;
-  color: #CFCFCF;
-  background-color: #212121;
-  border: 2px solid #CFCFCF;
-  cursor: pointer;
-  margin-top: 8px;
-  transition: background-color 0.2s, transform 0.1s;
-}
-
-#restart-button:hover {
-  background-color: #333;
-}
-
-#restart-button:active {
-  transform: scale(0.95);
 }
 
 .piece-layer {
