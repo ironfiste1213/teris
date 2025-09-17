@@ -11,6 +11,9 @@ const Activepiece = document.getElementById("active-piece-layer");
 const GhostPice = document.getElementById("ghost-piece-layer");
 const Timer = document.getElementById("timer");
 const lives = document.getElementById("lives");
+const PauseMenu = document.getElementById("pause-menu");
+const ContinueButton = document.getElementById("continue-button");
+const RestartModalButton = document.getElementById("restart-modal-button");
 
 const colum = 10;
 const row = 20;
@@ -30,7 +33,7 @@ const SHAPES = {
   O: [[[0, 0], [1, 0], [0, 1], [1, 1]], [[0, 0], [1, 0], [0, 1], [1, 1]], [[0, 0], [1, 0], [0, 1], [1, 1]], [[0, 0], [1, 0], [0, 1], [1, 1]]],
   T: [[[1, 0], [0, 1], [1, 1], [2, 1]], [[1, 0], [0, 1], [1, 1], [1, 2]], [[0, 1], [1, 1], [2, 1], [1, 2]], [[1, 0], [1, 1], [2, 1], [1, 2]]],
   S: [[[1, 0], [2, 0], [0, 1], [1, 1]], [[1, 0], [1, 1], [2, 1], [2, 2]], [[1, 1], [2, 1], [0, 2], [1, 2]], [[0, 0], [0, 1], [1, 1], [1, 2]]],
-  Z: [[[0, 0], [1, 0], [1, 1], [2, 1]], [[2, 0], [1, 1], [2, 1], [1, 2]], [[0, 1], [1, 1], [1, 2], [2, 2]], [[1, 0], [0, 1], [1, 1], [0, 2]]],
+  Z: [[[0, 0], [1, 0], [1, 1], [2, 1]], [[2, 0], [1, 1], [2, 1], [1, 2]], [[0, 1], [1, 1], [2, 1], [2, 2]], [[1, 0], [0, 1], [1, 1], [0, 2]]],
   J: [[[0, 0], [0, 1], [1, 1], [2, 1]], [[1, 0], [2, 0], [1, 1], [1, 2]], [[0, 1], [1, 1], [2, 1], [2, 2]], [[1, 0], [1, 1], [0, 2], [1, 2]]],
   L: [[[2, 0], [0, 1], [1, 1], [2, 1]], [[1, 0], [1, 1], [1, 2], [2, 2]], [[0, 1], [1, 1], [2, 1], [0, 2]], [[0, 0], [1, 0], [1, 1], [1, 2]]]
 };
@@ -114,8 +117,8 @@ function createPieceVisuals(layer, shape, pieceType, opacity) {
     block.style.backgroundColor = COLORS[pieceType];
     block.classList.add("piece-block");
     block.style.opacity = opacity;
-    block.style.left = `${dx * 30}px`;
-    block.style.top = `${dy * 30}px`;
+    block.style.left = (dx * 30 + 2) + "px";
+    block.style.top = (dy * 30 + 2) + "px";
     layer.appendChild(block);
   }
 }
@@ -355,6 +358,16 @@ function renderHold() {
   });
 }
 
+// Show pause menu when paused
+function showPauseMenu() {
+  PauseMenu.style.display = "flex";
+}
+
+// Hide pause menu
+function hidePauseMenu() {
+  PauseMenu.style.display = "none";
+}
+
 function loop(timestap) {
   if (state.over || state.paused) {
     return;
@@ -430,6 +443,16 @@ document.addEventListener('keydown', (e) => {
       if (isValidMove(0, 0, newRot)) {
         state.active.rotation = newRot;
         rotation();
+      } 
+      else if (isValidMove(-1, 0, newRot)) {
+        state.active.x -= 1;
+        state.active.rotation = newRot;
+        rotation();
+      } 
+      else if (isValidMove(1, 0, newRot)) {
+        state.active.x += 1;
+        state.active.rotation = newRot;
+        rotation();
       }
       break;
 
@@ -456,7 +479,13 @@ document.addEventListener('keydown', (e) => {
     case 'P':
       state.paused = !state.paused;
       Paused.textContent = state.paused ? "Continue" : "pause";
-      requestAnimationFrame(loop);
+      if (state.paused) {
+        showPauseMenu();
+      } else {
+        hidePauseMenu();
+        requestAnimationFrame(loop);
+      }
+      break;
   }
 
   render();
@@ -465,10 +494,26 @@ document.addEventListener('keydown', (e) => {
 Paused.addEventListener("click", () => {
   state.paused = !state.paused;
   Paused.textContent = state.paused ? "Continue" : "pause";
+  if (state.paused) {
+    showPauseMenu();
+  } else {
+    hidePauseMenu();
+    requestAnimationFrame(loop);
+  }
+});
+
+ContinueButton.addEventListener("click", () => {
+  state.paused = false;
+  Paused.textContent = "pause";
+  hidePauseMenu();
   requestAnimationFrame(loop);
 });
 
 RestartButton.addEventListener("click", () => {
+  location.reload();
+});
+
+RestartModalButton.addEventListener("click", () => {
   location.reload();
 });
 
