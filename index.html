@@ -1,17 +1,106 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>TERIS</title>
-    <link rel="stylesheet" href="Style/main-menu.css" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
-  </head>
-  <body>
-    <div id="menu">
-      <h1>TERIS</h1>
-      <a href="game.html" class="start-button">START</a>
-    </div>
-  </body>
+
+<head>
+  <meta charset="UTF-8" />
+  <title>TERIS</title>
+  <link rel="stylesheet" href="Style/main-menu.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: "Press Start 2P", system-ui;
+    }
+
+    body {
+      background-color: #1a1a1a;
+      color: #CFCFCF;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      position: relative;
+      text-align: center;
+      flex-direction: column;
+      padding: 20px;
+    }
+
+    #story {
+      border: 2px solid #CFCFCF;
+      padding: 20px;
+      margin-bottom: 30px;
+      max-width: 800px;
+      text-align: left;
+      line-height: 1.4;
+      font-size: 14px;
+      height: 300px;
+      overflow-y: auto;
+    }
+
+    .start-button {
+      display: inline-block;
+      padding: 20px 40px;
+      background-color: #212121;
+      border: 2px solid #CFCFCF;
+      color: #CFCFCF;
+      text-decoration: none;
+      font-size: 18px;
+      transition: background-color 0.2s, transform 0.1s;
+    }
+
+    .start-button:hover {
+      background-color: #333;
+    }
+
+    .start-button:active {
+      transform: scale(0.95);
+    }
+  </style>
+</head>
+
+<body>
+  <div id="menu">
+    <h1>TERIS</h1>
+    <div id="story"></div>
+    <a href="game.html" class="start-button">START</a>
+  </div>
+
+  <script>
+    const storyText = `
+He is just a player, a pawn in the endless game. The blocks fall whether he wills it or not, 
+and every move he makes feels predetermined. 
+
+The tunnel ahead is obscured, the light distant. No matter how he shifts or rotates, 
+no matter how fast he reacts, the path forward remains hidden. 
+
+Each cleared line is a hollow victory, a brief illusion of progress. 
+He cannot stop, he cannot rest — the game never ends. 
+
+This is his reality: an infinite grid, a ceaseless descent, and a life measured in blocks. 
+Yet still, he presses start, again and again, hoping for an escape he will never see.
+`;
+
+    const storyDiv = document.getElementById("story");
+    let i = 0;
+
+    function typeStory() {
+      if (i < storyText.length) {
+        storyDiv.innerHTML += storyText.charAt(i) === '\n' ? '<br>' : storyText.charAt(i);
+        i++;
+        storyDiv.scrollTop = storyDiv.scrollHeight;
+        setTimeout(typeStory, 20);
+      }
+    }
+
+    typeStory();
+  </script>
+
+
+</body>
+
 </html>

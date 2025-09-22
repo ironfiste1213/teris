@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Game Over</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: "Press Start 2P", system-ui;
+    }
+
+    body {
+      background-color: #1a1a1a;
+      color: #CFCFCF;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      position: relative;
+      text-align: center;
+      flex-direction: column;
+      padding: 20px;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 200%;
+      height: 200%;
+      background-image:
+        linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+      background-size: 30px 30px;
+      animation: scrollGrid 40s linear infinite;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    @keyframes scrollGrid {
+      from {
+        background-position: 0 0;
+      }
+
+      to {
+        background-position: 1000px 1000px;
+      }
+    }
+
+    @keyframes colorCycle {
+      0% {
+        color: #6ec1e4;
+      }
+
+      14% {
+        color: #f7d06b;
+      }
+
+      28% {
+        color: #c38ddb;
+      }
+
+      42% {
+        color: #85d18d;
+      }
+
+      57% {
+        color: #f28b82;
+      }
+
+      71% {
+        color: #8ecae6;
+      }
+
+      85% {
+        color: #f9bc60;
+      }
+
+      100% {
+        color: #6ec1e4;
+      }
+    }
+
+    h1 {
+      font-size: 100px;
+      margin-bottom: 20px;
+      animation: colorCycle 30s infinite linear;
+      transition: color 0.5s;
+    }
+
+    #story {
+      border: 2px solid #CFCFCF;
+      padding: 20px;
+      margin-bottom: 30px;
+      max-width: 800px;
+      text-align: left;
+      line-height: 1.4;
+      font-size: 14px;
+      height: 300px;
+      overflow-y: auto;
+    }
+
+    .start-button {
+      display: inline-block;
+      padding: 20px 40px;
+      background-color: #212121;
+      border: 2px solid #CFCFCF;
+      color: #CFCFCF;
+      text-decoration: none;
+      font-size: 18px;
+      transition: background-color 0.2s, transform 0.1s;
+    }
+
+    .start-button:hover {
+      background-color: #333;
+    }
+
+    .start-button:active {
+      transform: scale(0.95);
+    }
+  </style>
+</head>
+
+<body>
+  <h1>GAME OVER</h1>
+  <div id="story"></div>
+  <a href="index.html" class="start-button">MAIN MENU</a>
+
+  <script>
+    const storyText = `
+He awoke again to the endless grid. The blocks fell with a mechanical certainty, 
+and he moved them with the same automated precision. Hours, days, years — he could no longer tell. 
+
+Every line cleared brought a fleeting sense of control, yet as soon as he thought he might rest, 
+another piece descended, another decision demanded, another moment stolen from freedom. 
+
+He remembered sunlight, once, or maybe it was a dream. The corridor stretched infinitely above and below; 
+the ceiling a blur, the floor a distant memory. Each move he made seemed meaningless, 
+each drop of a piece just another repetition in an unending cycle. 
+
+Sometimes he imagined an exit, a door at the end of the tunnel. He raced pieces faster, 
+cleared lines frantically, but the walls remained, closing in tighter with every success. 
+
+The score climbed endlessly, but the number meant nothing. Each rotation, each shift, 
+was just a testament to futility. There was no rest, no pause, no victory. 
+
+His body ached, his mind numbed, yet he continued. For even if he stopped, 
+the world beyond these grids would not return. He was trapped, forever moving, 
+forever stacking, forever losing, forever alone. 
+
+The blocks fell, he moved them. The cycle repeated. And still, he could not see the end. 
+The tunnel stretched on into darkness, and he played, and played, and played.
+`;
+
+    const storyDiv = document.getElementById("story");
+    let i = 0;
+
+    function typeStory() {
+      if (i < storyText.length) {
+        storyDiv.innerHTML += storyText.charAt(i) === '\n' ? '<br>' : storyText.charAt(i);
+        i++;
+        storyDiv.scrollTop = storyDiv.scrollHeight;
+        setTimeout(typeStory, 20);
+      }
+    }
+
+    typeStory();
+  </script>
+</body>
+
+</html>

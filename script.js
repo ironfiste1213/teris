@@ -52,7 +52,10 @@ let state = {
   paused: false,
   startTime: Date.now(),
   gameTime: 0,
+  lives: 3
 };
+lives.textContent = state.lives;
+
 
 let dt = 0;
 let lasttime = 0;
@@ -207,36 +210,41 @@ function rotation() {
 }
 
 function lockPiece() {
+  if (!state.active) return;
+
   const shape = SHAPES[state.active.type][state.active.rotation];
+  let hitTop = false;
+
   shape.forEach(([dx, dy]) => {
     const x = state.active.x + dx;
     const y = state.active.y + dy;
-    if (y < 0) {
-      state.over = true;
-      return;
-    } else if (y < row) {
-      state.grid[y][x] = state.active.type;
-    }
+
+    if (y < 0) hitTop = true;
+    else if (y < row) state.grid[y][x] = state.active.type;
   });
-  
-  if (state.over) {
-    const currentLives = parseInt(lives.textContent);
-    if (currentLives > 1) {
-      // Lose a life and reset
-      lives.textContent = currentLives - 1;
+  if (hitTop) {
+    state.lives -= 1;
+    lives.textContent = state.lives;
+
+    if (state.lives <= 0) {
+      state.over = true;
+      window.location.href = "gameover.html";
+      return;
+    } else {
       state.grid.forEach(row => row.fill(0));
-      state.over = false;
+      state.active = null;
+      state.hold = null;
+      state.canHold = true;
       renderGrid();
       spawnPiece();
       return;
     }
-    return;
   }
-  
   clearLines();
   renderGrid();
   spawnPiece();
 }
+
 
 function hardDrop() {
   while (isValidMove(0, 1, state.active.rotation)) {
