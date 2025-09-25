@@ -7,8 +7,10 @@ function handlePause() {
     state.paused = !state.paused;
     togglePauseButton(state.paused);
     if (state.paused) {
+        state.pauseStartTime = Date.now();
         showPauseMenu();
     } else {
+        state.totalPausedTime += Date.now() - state.pauseStartTime;
         hidePauseMenu();
     }
 }

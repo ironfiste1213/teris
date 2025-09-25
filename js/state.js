@@ -31,6 +31,8 @@ export function resetState() {
     state.paused = false;
     state.startTime = Date.now();
     state.gameTime = 0;
+    state.pauseStartTime = 0;
+    state.totalPausedTime = 0;
     state.lives = 3;
    
     state.linesForLevelUp = 0;

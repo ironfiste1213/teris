@@ -1,7 +1,6 @@
-import { state, resetState, bag } from './state.js';
+import { state, bag } from './state.js';
 import { SHAPES, COLUMNS, ROWS } from './constants.js';
 import * as view from './view.js';
-import { board } from './dom.js';
 
 // Checks if a piece's potential move (translation or rotation) is valid
 export function isValidMove(piece, xOffset, yOffset, rotation) {

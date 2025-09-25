@@ -110,7 +110,7 @@ export function updateStats() {
 // Updates the game timer
 export function updateTimer() {
   if (!state.paused && !state.over) {
-    state.gameTime = Date.now() - state.startTime;
+    state.gameTime = Date.now() - state.startTime - state.totalPausedTime;
     const minutes = Math.floor(state.gameTime / 60000);
     const seconds = Math.floor((state.gameTime % 60000) / 1000);
     Timer.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
