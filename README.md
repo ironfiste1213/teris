@@ -23,7 +23,7 @@
  *   **Down Arrow / S:** Soft drop (move piece down faster, gain 1 point per cell)
  *   **Up Arrow / W:** Rotate piece
  *   **Spacebar:** Hard drop (instantly drop piece, gain 2 points per cell dropped)
- *   **C:** Hold piece (swap current piece with held piece, or hold current if none is held)
+ *   **SHIFT:** Hold piece (swap current piece with held piece, or hold current if none is held)
  *   **P:** Pause/Unpause game
  *   **R:** Restart game (from pause menu)
 
@@ -43,9 +43,9 @@
 
  ## Technologies Used
 
- *   **HTML5:** For the game structure and content.
- *   **CSS3:** For styling and animations.
- *   **JavaScript (ES6 Modules):** For game logic and interactivity.
+ *   **HTML:** For the game structure and content.
+ *   **CSS:** For styling and animations.
+ *   **JavaScript:** For game logic and interactivity.
 
  ## Project Structure
 

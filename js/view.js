@@ -2,14 +2,14 @@ import { state } from './state.js';
 import { COLUMNS, COLORS, SHAPES, ROWS } from './constants.js';
 import { holdCells, nextPreviews, Activepiece, GhostPice, Lockedpieces, PauseMenu, Timer, Score, Lines, Level, lives as livesEl, Paused as PausedEl, container } from './dom.js';
 
-// Removes all child elements from a given DOM layer.
+// Removes all child elements from a given DOM layer
 function clearLayer(layer) {
   while (layer.firstChild) {
     layer.removeChild(layer.firstChild);
   }
 }
 
-// Renders the locked pieces on the board based on the game state grid.
+// Renders the locked pieces on the board based on the game state grid
 export function renderBoard() {
   clearLayer(Lockedpieces);
   for (let y = 0; y < ROWS; y++) {
@@ -27,7 +27,7 @@ export function renderBoard() {
   }
 }
 
-// Renders the currently falling (active) piece.
+// Renders the currently falling (active) piece
 export function renderActivePiece(piece) {
     if (!piece) return;
     const shape = SHAPES[piece.type][piece.rotation];
@@ -37,7 +37,7 @@ export function renderActivePiece(piece) {
     Activepiece.style.transform = `translate(${activeX}px, ${activeY}px)`;
 }
 
-// Creates the visual blocks for a piece on a given layer.
+// Creates the visual blocks for a piece on a given layer
 function createPieceVisuals(layer, shape, pieceType) {
   clearLayer(layer);
   for (let i = 0; i < 4; i++) {
@@ -50,7 +50,7 @@ function createPieceVisuals(layer, shape, pieceType) {
   }
 }
 
-// Renders the ghost piece, showing where the active piece will land.
+// Renders the ghost piece, showing where the active piece will land
 export function renderGhostPiece(piece, ghostY) {
     if (!piece) return;
     const shape = SHAPES[piece.type][piece.rotation];
@@ -59,10 +59,10 @@ export function renderGhostPiece(piece, ghostY) {
     GhostPice.style.transform = `translate(${ghostX}px, ${ghostY * 30}px)`;
 }
 
-// Renders the upcoming pieces in the "Next" preview area.
+// Renders the upcoming pieces in the "next" preview area
 export function renderNext() {
   nextPreviews.forEach(cells => {
-    cells.forEach(cell => (cell.style.backgroundColor = '#212121'));
+    cells.forEach(cell => (cell.style.backgroundColor = '#424242ff'));
   });
 
   for (let i = 0; i < 5; i++) {
@@ -82,9 +82,9 @@ export function renderNext() {
   }
 }
 
-// Renders the piece in the "Hold" area.
+// Renders the piece in the "hold" area
 export function renderHold() {
-  holdCells.forEach(cell => (cell.style.backgroundColor = '#212121'));
+  holdCells.forEach(cell => (cell.style.backgroundColor = '#424242ff'));
 
   if (!state.hold) return;
 
@@ -99,7 +99,7 @@ export function renderHold() {
   });
 }
 
-// Updates the displayed score, lines, level, and lives.
+// Updates the displayed score, lines, level, and lives
 export function updateStats() {
     Score.textContent = state.score;
     Lines.textContent = state.lines;
@@ -107,7 +107,7 @@ export function updateStats() {
     livesEl.textContent = state.lives;
 }
 
-// Updates the game timer.
+// Updates the game timer
 export function updateTimer() {
   if (!state.paused && !state.over) {
     state.gameTime = Date.now() - state.startTime;
@@ -117,12 +117,12 @@ export function updateTimer() {
   }
 }
 
-// Displays the pause menu overlay.
+// Displays the pause menu overlay
 export function showPauseMenu() {
   PauseMenu.style.display = "flex";
 }
 
-// Hides the pause menu overlay.
+// Hides the pause menu overlay
 export function hidePauseMenu() {
   PauseMenu.style.display = "none";
 }
@@ -132,7 +132,7 @@ export function togglePauseButton(paused) {
     PausedEl.textContent = paused ? "Continue" : "pause";
 }
 
-// Plays the screen shake animation for a hard drop.
+// Plays the screen shake animation for a hard drop
 export function playHardDropAnimation() {
     container.classList.add("hit-drop-animation");
     container.addEventListener("animationend", () => {
