@@ -2,6 +2,7 @@ import { state, resetState, bag } from './state.js';
 import { SHAPES, COLUMNS, ROWS } from './constants.js';
 import * as view from './view.js';
 
+// Checks if a piece's potential move (translation or rotation) is valid.
 export function isValidMove(piece, xOffset, yOffset, rotation) {
   const shape = SHAPES[piece.type][rotation];
   for (const [dx, dy] of shape) {
@@ -13,6 +14,7 @@ export function isValidMove(piece, xOffset, yOffset, rotation) {
   return true;
 }
 
+// Calculates the final Y position for the ghost piece.
 function getGhostY() {
   if (!state.active) return 0;
   let y = state.active.y;
@@ -22,6 +24,7 @@ function getGhostY() {
   return y;
 }
 
+// Renders the active piece and its corresponding ghost piece.
 function render() {
     if (state.over || !state.active) return;
     view.renderActivePiece(state.active);
@@ -29,6 +32,7 @@ function render() {
     view.renderGhostPiece(state.active, ghostY);
 }
 
+// Spawns a new piece at the top of the board.
 function spawnPiece() {
   if (state.over) return;
   if (state.nextQ.length < 7) {
@@ -61,11 +65,13 @@ function spawnPiece() {
   render();
 }
 
+// Updates the score based on the number of lines cleared.
 function updateScore(linesCleared) {
   const basePoints = [0, 40, 100, 300, 1200];
   state.score += basePoints[linesCleared] * state.level;
 }
 
+// Clears completed lines from the grid.
 function clearLines() {
   let linesCleared = 0;
   for (let y = ROWS - 1; y >= 0; y--) {
@@ -90,6 +96,7 @@ function clearLines() {
   }
 }
 
+// Locks the active piece into the grid.
 function lockPiece() {
   if (!state.active) return;
 
@@ -105,6 +112,7 @@ function lockPiece() {
   spawnPiece();
 }
 
+// Moves the active piece one column to the left.
 export function moveLeft() {
     if (isValidMove(state.active, -1, 0, state.active.rotation)) {
         state.active.x -= 1;
@@ -112,6 +120,7 @@ export function moveLeft() {
     }
 }
 
+// Moves the active piece one column to the right.
 export function moveRight() {
     if (isValidMove(state.active, 1, 0, state.active.rotation)) {
         state.active.x += 1;
@@ -119,6 +128,7 @@ export function moveRight() {
     }
 }
 
+// Moves the active piece one row down (soft drop).
 export function moveDown() {
     if (isValidMove(state.active, 0, 1, state.active.rotation)) {
         state.score += 1;
@@ -130,6 +140,7 @@ export function moveDown() {
     }
 }
 
+// Rotates the active piece, with wall kick checks.
 export function rotate() {
     const newRot = (state.active.rotation + 1) % 4;
     if (isValidMove(state.active, 0, 0, newRot)) {
@@ -144,6 +155,7 @@ export function rotate() {
     render();
 }
 
+// Instantly drops the active piece to its lowest valid position (hard drop).
 export function hardDrop() {
   const ghostY = getGhostY();
   if (ghostY > state.active.y) {
@@ -155,6 +167,7 @@ export function hardDrop() {
   view.playHardDropAnimation();
 }
 
+// Swaps the active piece with the piece in the hold area.
 export function holdPiece() {
   if (!state.canHold) return;
   
@@ -180,6 +193,7 @@ export function holdPiece() {
 let dt = 0;
 let lasttime = 0;
 
+// The main game loop, which updates game state and renders frames.
 export function gameLoop(timestamp) {
   if (state.over) return;
   

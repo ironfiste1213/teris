@@ -88,6 +88,7 @@ Yet still, he presses start, again and again, hoping for an escape he will never
     const storyDiv = document.getElementById("story");
     let i = 0;
 
+    // Types out the story text character by character into the story div.
     function typeStory() {
       if (i < storyText.length) {
         storyDiv.innerHTML += storyText.charAt(i) === '\n' ? '<br>' : storyText.charAt(i);

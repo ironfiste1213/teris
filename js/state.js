@@ -1,5 +1,6 @@
 import { ROWS, COLUMNS } from './constants.js';
 
+// Creates and returns a shuffled array of tetromino piece types (a "7-bag").
 export function bag() {
   const pieces = ['I', 'O', 'T', 'S', 'Z', 'J', 'L'];
   const shuffled = [];
@@ -15,6 +16,7 @@ export function bag() {
 
 export let state = {};
 
+// Resets the game state to its initial values for a new game.
 export function resetState() {
     state.grid = Array.from({ length: ROWS }, () => Array(COLUMNS).fill(0));
     state.active = null;
