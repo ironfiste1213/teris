@@ -94,6 +94,65 @@
       transition: color 0.5s;
     }
 
+    #score-container {
+      margin-bottom: 20px;
+      font-size: 24px;
+    }
+
+    #score-form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+
+    #score-form input {
+      background-color: #1a1a1a;
+      border: 2px solid #CFCFCF;
+      color: #CFCFCF;
+      padding: 10px;
+      font-family: "Press Start 2P", system-ui;
+      text-align: center;
+      width: 250px;
+    }
+
+    #score-form button {
+      padding: 10px 20px;
+      background-color: #212121;
+      border: 2px solid #CFCFCF;
+      color: #CFCFCF;
+      font-family: "Press Start 2P", system-ui;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    #score-form button:hover {
+      background-color: #333;
+    }
+
+    #score-form button:disabled {
+      background-color: #111;
+      color: #555;
+      border-color: #555;
+      cursor: not-allowed;
+    }
+
+    #error-message {
+      color: #f28b82;
+      height: 20px;
+      font-size: 12px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .button-container {
+      display: flex;
+      gap: 20px;
+    }
+
     #story {
       border: 2px solid #CFCFCF;
       padding: 20px;
@@ -129,8 +188,20 @@
 
 <body>
   <h1>GAME OVER</h1>
+
+  <div id="score-container"></div>
+
+  <form id="score-form">
+    <input type="text" id="name-input" placeholder="ENTER YOUR NAME" maxlength="15" autocomplete="off">
+    <div id="error-message"></div>
+    <button type="submit" id="submit-button">SAVE SCORE</button>
+  </form>
+
   <div id="story"></div>
-  <a href="index.html" class="start-button">MAIN MENU</a>
+
+  <div class="button-container">
+    <a href="index.html" class="start-button">MAIN MENU</a>
+  </div>
 
   <script>
     const storyText = `
@@ -157,6 +228,62 @@ forever stacking, forever losing, forever alone.
 The blocks fell, he moved them. The cycle repeated. And still, he could not see the end. 
 The tunnel stretched on into darkness, and he played, and played, and played.
 `;
+
+    const scoreContainer = document.getElementById('score-container');
+    const scoreForm = document.getElementById('score-form');
+    const nameInput = document.getElementById('name-input');
+    const submitButton = document.getElementById('submit-button');
+    const errorMessage = document.getElementById('error-message');
+
+    const finalScore = localStorage.getItem('finalScore');
+    const finalTime = localStorage.getItem('finalTime');
+
+    if (finalScore !== null) {
+      scoreContainer.textContent = `FINAL SCORE: ${finalScore}`;
+    } else {
+      scoreForm.classList.add('hidden');
+    }
+
+    scoreForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = nameInput.value.trim();
+
+      // --- Client-Side Validation ---
+      if (name === '') {
+        errorMessage.textContent = 'Player name cannot be empty';
+        return;
+      }
+      if (name.length > 15) {
+        errorMessage.textContent = 'Player name is too long';
+        return;
+      }
+      errorMessage.textContent = '';
+      submitButton.disabled = true;
+      submitButton.textContent = 'SAVING...';
+
+      try {
+        const response = await fetch('/api/scores', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: name,
+            score: parseInt(finalScore, 10),
+            time: finalTime,
+          }),
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(errorText || 'Failed to save score');
+        }
+
+        scoreForm.innerHTML = '<p>SCORE SAVED!</p>';
+      } catch (error) {
+        errorMessage.textContent = `Error: ${error.message}`;
+        submitButton.disabled = false;
+        submitButton.textContent = 'SAVE SCORE';
+      }
+    });
 
     const storyDiv = document.getElementById("story");
     let i = 0;

@@ -46,6 +46,8 @@ function spawnPiece() {
       view.updateStats();
       if (state.lives <= 0) {
           state.over = true;
+          localStorage.setItem('finalScore', state.score);
+          localStorage.setItem('finalTime', document.getElementById('timer').textContent);
           window.location.href = "gameover.html";
           return;
       } else {
