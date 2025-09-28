@@ -27,6 +27,14 @@
       padding: 20px;
     }
 
+    .content-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      gap: 40px;
+      width: 100%;
+    }
+
     body::before {
       content: "";
       position: fixed;
@@ -143,14 +151,63 @@
       height: 20px;
       font-size: 12px;
     }
-
+    
     .hidden {
       display: none;
     }
 
     .button-container {
       display: flex;
+      margin-top: 30px;
       gap: 20px;
+    }
+
+    #scoreboard-container {
+      border: 2px solid #CFCFCF;
+      padding: 20px;
+      width: 450px;
+      text-align: left;
+    }
+
+    #scoreboard-container h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 16px;
+    }
+
+    #scoreboard-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    #scoreboard-table th,
+    #scoreboard-table td {
+      padding: 8px;
+      text-align: left;
+      border-bottom: 1px solid #444;
+    }
+
+    #scoreboard-table th {
+      text-align: center;
+    }
+
+    #pagination-controls {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: 20px;
+      font-size: 14px;
+    }
+
+    #pagination-controls button {
+      background: none;
+      border: none;
+      color: #CFCFCF;
+      font-family: "Press Start 2P", system-ui;
+      cursor: pointer;
+      font-size: 20px;
+      padding: 0 15px;
     }
 
     #story {
@@ -158,7 +215,7 @@
       padding: 20px;
       margin-bottom: 30px;
       max-width: 800px;
-      text-align: left;
+      text-align: justify;
       line-height: 1.4;
       font-size: 14px;
       height: 300px;
@@ -191,115 +248,33 @@
 
   <div id="score-container"></div>
 
-  <form id="score-form">
-    <input type="text" id="name-input" placeholder="ENTER YOUR NAME" maxlength="15" autocomplete="off">
-    <div id="error-message"></div>
-    <button type="submit" id="submit-button">SAVE SCORE</button>
-  </form>
+  <div id="submission-area">
+    <form id="score-form">
+      <input type="text" id="name-input" name="name-input" placeholder="ENTER YOUR NAME" maxlength="15" autocomplete="off">
+      <div id="error-message"></div>
+      <button type="submit" id="submit-button">SAVE SCORE</button>
+    </form>
+  </div>
 
-  <div id="story"></div>
+  <div class="content-wrapper">
+    <div id="story"></div>
+    <div id="scoreboard-container">
+      <h2>LEADERBOARD</h2>
+      <table id="scoreboard-table">
+        <thead>
+          <tr><th>Rank</th><th>Name</th><th>Score</th><th>Time</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <div id="pagination-controls"></div>
+    </div>
+  </div>
 
   <div class="button-container">
     <a href="index.html" class="start-button">MAIN MENU</a>
   </div>
 
-  <script>
-    const storyText = `
-He awoke again to the endless grid. The blocks fell with a mechanical certainty, 
-and he moved them with the same automated precision. Hours, days, years — he could no longer tell. 
-
-Every line cleared brought a fleeting sense of control, yet as soon as he thought he might rest, 
-another piece descended, another decision demanded, another moment stolen from freedom. 
-
-He remembered sunlight, once, or maybe it was a dream. The corridor stretched infinitely above and below; 
-the ceiling a blur, the floor a distant memory. Each move he made seemed meaningless, 
-each drop of a piece just another repetition in an unending cycle. 
-
-Sometimes he imagined an exit, a door at the end of the tunnel. He raced pieces faster, 
-cleared lines frantically, but the walls remained, closing in tighter with every success. 
-
-The score climbed endlessly, but the number meant nothing. Each rotation, each shift, 
-was just a testament to futility. There was no rest, no pause, no victory. 
-
-His body ached, his mind numbed, yet he continued. For even if he stopped, 
-the world beyond these grids would not return. He was trapped, forever moving, 
-forever stacking, forever losing, forever alone. 
-
-The blocks fell, he moved them. The cycle repeated. And still, he could not see the end. 
-The tunnel stretched on into darkness, and he played, and played, and played.
-`;
-
-    const scoreContainer = document.getElementById('score-container');
-    const scoreForm = document.getElementById('score-form');
-    const nameInput = document.getElementById('name-input');
-    const submitButton = document.getElementById('submit-button');
-    const errorMessage = document.getElementById('error-message');
-
-    const finalScore = localStorage.getItem('finalScore');
-    const finalTime = localStorage.getItem('finalTime');
-
-    if (finalScore !== null) {
-      scoreContainer.textContent = `FINAL SCORE: ${finalScore}`;
-    } else {
-      scoreForm.classList.add('hidden');
-    }
-
-    scoreForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const name = nameInput.value.trim();
-
-      // --- Client-Side Validation ---
-      if (name === '') {
-        errorMessage.textContent = 'Player name cannot be empty';
-        return;
-      }
-      if (name.length > 15) {
-        errorMessage.textContent = 'Player name is too long';
-        return;
-      }
-      errorMessage.textContent = '';
-      submitButton.disabled = true;
-      submitButton.textContent = 'SAVING...';
-
-      try {
-        const response = await fetch('/api/scores', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            name: name,
-            score: parseInt(finalScore, 10),
-            time: finalTime,
-          }),
-        });
-
-        if (!response.ok) {
-          const errorText = await response.text();
-          throw new Error(errorText || 'Failed to save score');
-        }
-
-        scoreForm.innerHTML = '<p>SCORE SAVED!</p>';
-      } catch (error) {
-        errorMessage.textContent = `Error: ${error.message}`;
-        submitButton.disabled = false;
-        submitButton.textContent = 'SAVE SCORE';
-      }
-    });
-
-    const storyDiv = document.getElementById("story");
-    let i = 0;
-
-    // Types out the story text character by character into the story div
-    function typeStory() {
-      if (i < storyText.length) {
-        storyDiv.innerHTML += storyText.charAt(i) === '\n' ? '<br>' : storyText.charAt(i);
-        i++;
-        storyDiv.scrollTop = storyDiv.scrollHeight;
-        setTimeout(typeStory, 20);
-      }
-    }
-
-    typeStory();
-  </script>
+  <script src="js/gameover.js" defer></script>
 </body>
 
 </html>

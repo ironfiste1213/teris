@@ -1,18 +1,8 @@
 [
   {
-    "name": "mimoune",
-    "score": 808,
-    "time": "00:11"
-  },
-  {
     "name": "sdzsd",
     "score": 3222,
     "time": "02:05"
-  },
-  {
-    "name": "mimoune",
-    "score": 693,
-    "time": "00:05"
   },
   {
     "name": "alice",
@@ -20,24 +10,39 @@
     "time": "00:53"
   },
   {
-    "name": "said",
-    "score": 636,
-    "time": "00:05"
-  },
-  {
-    "name": "ossama",
-    "score": 635,
-    "time": "00:03"
-  },
-  {
-    "name": "mm",
-    "score": 356,
-    "time": "04:11"
-  },
-  {
     "name": "kali",
     "score": 1001,
     "time": "00:44"
+  },
+  {
+    "name": "mimoune",
+    "score": 808,
+    "time": "00:11"
+  },
+  {
+    "name": "mimo",
+    "score": 732,
+    "time": "00:05"
+  },
+  {
+    "name": "ii",
+    "score": 729,
+    "time": "00:03"
+  },
+  {
+    "name": "ii",
+    "score": 729,
+    "time": "00:03"
+  },
+  {
+    "name": "ii",
+    "score": 729,
+    "time": "00:03"
+  },
+  {
+    "name": "mimoune",
+    "score": 693,
+    "time": "00:05"
   },
   {
     "name": "rgrtr",
@@ -55,23 +60,23 @@
     "time": "00:12"
   },
   {
-    "name": "ii",
-    "score": 729,
-    "time": "00:03"
-  },
-  {
-    "name": "ii",
-    "score": 729,
-    "time": "00:03"
-  },
-  {
-    "name": "ii",
-    "score": 729,
-    "time": "00:03"
-  },
-  {
     "name": "uu",
     "score": 636,
     "time": "00:09"
+  },
+  {
+    "name": "said",
+    "score": 636,
+    "time": "00:05"
+  },
+  {
+    "name": "ossama",
+    "score": 635,
+    "time": "00:03"
+  },
+  {
+    "name": "mm",
+    "score": 356,
+    "time": "04:11"
   }
 ]

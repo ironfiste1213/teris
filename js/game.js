@@ -46,9 +46,8 @@ function spawnPiece() {
       view.updateStats();
       if (state.lives <= 0) {
           state.over = true;
-          localStorage.setItem('finalScore', state.score);
-          localStorage.setItem('finalTime', document.getElementById('timer').textContent);
-          window.location.href = "gameover.html";
+          
+          window.location.href =    `gameover.html?score=${state.score}&time=${document.getElementById('timer').textContent}`;
           return;
       } else {
           // Don't reset the whole state just clear the board and held piece
