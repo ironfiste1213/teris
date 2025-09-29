@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"net/http"
+	"regexp"
 )
 
 func ScoreHandler(w http.ResponseWriter, r *http.Request) {
@@ -29,7 +30,7 @@ func ScoreHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// You could add validation for the newScore fields here
+		// Perform all validation on the new score *before* processing it.
 		// Basic server-side validation
 		if newScore.Name == "" {
 			http.Error(w, "Player name cannot be empty", http.StatusBadRequest)
@@ -43,10 +44,15 @@ func ScoreHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Score cannot be negative", http.StatusBadRequest)
 			return
 		}
+		if match, _ := regexp.MatchString(`^\d{2}:\d{2}$`, newScore.Time); !match {
+			http.Error(w, "Time format must be MM:SS", http.StatusBadRequest)
+			return
+		}
 
 		// Load existing scores to calculate rank
 		scores, err := LoadScores("scores.json")
 		if err != nil {
+			// This is a server error, not a user error.
 			http.Error(w, "Failed to load scores for ranking", http.StatusInternalServerError)
 			return
 		}
@@ -55,14 +61,7 @@ func ScoreHandler(w http.ResponseWriter, r *http.Request) {
 		SortScores(scores) // Sort to find the rank and prepare for saving
 
 		// Find the rank of the new score
-		rank := 0
-		for i, s := range scores {
-			if s.Name == newScore.Name && s.Score == newScore.Score && s.Time == newScore.Time {
-				rank = i + 1
-				break
-			}
-		}
-
+		
 		// Save the updated list of scores
 		if err := SaveScores("scores.json", scores); err != nil {
 			http.Error(w, "Failed to save new score", http.StatusInternalServerError)
@@ -72,13 +71,10 @@ func ScoreHandler(w http.ResponseWriter, r *http.Request) {
 		// Respond with the rank and total scores
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
-		err = json.NewEncoder(w).Encode(map[string]interface{}{
-			"rank":  rank,
-			"total": len(scores),
-		})
+		
 		if err != nil {
 			// Log the error server-side, the header is already sent.
-			http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+			// We can't send an http.Error here, but we can log it.
 		}
 
 	default:

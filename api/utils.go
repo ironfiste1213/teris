@@ -37,16 +37,7 @@ func SaveScores(filename string, scores []Score) error {
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(filename, data, 0644)
-}
-
-func InsertScore(filename string, score Score) error {
-	scores, err := LoadScores(filename)
-	if err != nil {
-		return err
-	}
-	scores = append(scores, score)
-	return SaveScores(filename, scores)
+	return os.WriteFile(filename, data, 0o644)
 }
 
 func SortScores(scores []Score) {
@@ -55,15 +46,11 @@ func SortScores(scores []Score) {
 	})
 }
 
-func RankScores(scores []Score) []RankedScore {
-	rankedScores := make([]RankedScore, len(scores))
-	for i, score := range scores {
-		rankedScores[i] = RankedScore{
-			Rank:  i + 1,
-			Name:  score.Name,
-			Score: score.Score,
-			Time:  score.Time,
-		}
+// RankScores iterates over a sorted slice of scores and assigns a rank to each.
+// It modifies the slice in place and returns it.
+func RankScores(scores []Score) []Score {
+	for i := range scores {
+		scores[i].Rank = i + 1
 	}
-	return rankedScores
+	return scores
 }
