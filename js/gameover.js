@@ -44,6 +44,12 @@ function displayScores(scoresToDisplay = null) {
     const paginatedScores = allScores.slice(startIndex, endIndex);
 
     scoreboardBody.innerHTML = ''; // Clear existing scores
+    if (allScores.length === 0) {
+        paginationControls.innerHTML = ''; // Hide pagination if no scores
+        scoreboardBody.innerHTML = '<tr><td colspan="4" style="text-align: center;">Be the first to set a score!</td></tr>';
+        return;
+    }
+
     paginatedScores.forEach(score => {
         const row = scoreboardBody.insertRow();
         row.innerHTML = `<td>${score.Rank || score.rank}</td><td>${score.Name || score.name}</td><td>${score.Score || score.score}</td><td>${score.Time || score.time}</td>`;
