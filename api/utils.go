@@ -8,6 +8,11 @@ import (
 	"sort"
 )
 
+type PlayerData struct {
+	Score int    `json:"score"`
+	Time  string `json:"time"`
+}
+
 // LoadScores reads a slice of Score from a JSON file.
 // If the file does not exist or is empty, it returns an empty slice and no error.
 func LoadScores(filename string) ([]Score, error) {
@@ -53,4 +58,28 @@ func RankScores(scores []Score) []Score {
 		scores[i].Rank = i + 1
 	}
 	return scores
+}
+
+func WritePlayerData(filename string, playerdata PlayerData) error {
+	data, err := json.MarshalIndent(playerdata, "", "  ")
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(filename, data, 0o644)
+}
+
+func ReadPlayerData(filename string) (PlayerData, error) {
+	var playerData PlayerData
+	file, err := os.Open(filename)
+	if err != nil {
+		return PlayerData{}, err
+	}
+	defer file.Close()
+
+	data, err := io.ReadAll(file)
+	if err != nil {
+		return PlayerData{}, err
+	}
+
+	return playerData, json.Unmarshal(data, &playerData)
 }

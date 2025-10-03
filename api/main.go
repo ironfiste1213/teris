@@ -10,8 +10,9 @@ func main() {
 	// Create a new ServeMux, which is a request router.
 	mux := http.NewServeMux()
 
-	// Handle API requests under the "/api/" prefix.
-	mux.HandleFunc("/api/scores", ScoreHandler)
+	// Handle API requests
+	mux.HandleFunc("/api/score", ScoreHandler)
+	mux.HandleFunc("/api/playerdata", PlayerDataHandler)
 
 	// Serve the static game files from the parent directory.
 	mux.Handle("/", http.FileServer(http.Dir("..")))

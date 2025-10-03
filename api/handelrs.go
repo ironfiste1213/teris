@@ -2,7 +2,9 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"os"
 	"regexp"
 )
 
@@ -10,6 +12,7 @@ func ScoreHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
 		scores, err := LoadScores("scores.json")
+		fmt.Println("GET /api/score")
 		if err != nil {
 			http.Error(w, "Failed to load scores", http.StatusInternalServerError)
 			return
@@ -61,7 +64,7 @@ func ScoreHandler(w http.ResponseWriter, r *http.Request) {
 		SortScores(scores) // Sort to find the rank and prepare for saving
 
 		// Find the rank of the new score
-		
+
 		// Save the updated list of scores
 		if err := SaveScores("scores.json", scores); err != nil {
 			http.Error(w, "Failed to save new score", http.StatusInternalServerError)
@@ -71,12 +74,65 @@ func ScoreHandler(w http.ResponseWriter, r *http.Request) {
 		// Respond with the rank and total scores
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
-		
+		rankedScores := RankScores(scores) // Then assign ranks
+
+		err = json.NewEncoder(w).Encode(rankedScores)
 		if err != nil {
-			// Log the error server-side, the header is already sent.
-			// We can't send an http.Error here, but we can log it.
+			http.Error(w, "Failed to encode scores", http.StatusInternalServerError)
 		}
 
+	default:
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	}
+}
+
+func PlayerDataHandler(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodPost:
+		var data struct {
+			Score int    `json:"score"`
+			Time  string `json:"time"`
+		}
+
+		err := json.NewDecoder(r.Body).Decode(&data)
+		if err != nil {
+			http.Error(w, "Invalid request body", http.StatusBadRequest)
+			return
+		}
+
+		if data.Score < 0 {
+			http.Error(w, "Score cannot be negative", http.StatusBadRequest)
+			return
+		}
+		if match, _ := regexp.MatchString(`^\d{2}:\d{2}$`, data.Time); !match {
+			http.Error(w, "Time format must be MM:SS", http.StatusBadRequest)
+			return
+		}
+
+		// Write to playerdata.json
+		err = WritePlayerData("playerdata.json", PlayerData{Score: data.Score, Time: data.Time})
+		if err != nil {
+			http.Error(w, "Failed to write player data", http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusCreated)
+		w.Write([]byte(`{"status":"ok"}`))
+	case http.MethodGet:
+		playerData, err := ReadPlayerData("playerdata.json")
+		if err != nil {
+			if os.IsNotExist(err) {
+				http.Error(w, "Player data not found", http.StatusNotFound)
+				return
+			}
+			http.Error(w, "Failed to read player data", http.StatusInternalServerError)
+			return
+		}
+		// Delete the file after reading to ensure it can only be fetched once.
+		os.Remove("playerdata.json")
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(playerData)
 	default:
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}

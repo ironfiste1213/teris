@@ -46,8 +46,14 @@ function spawnPiece() {
       view.updateStats();
       if (state.lives <= 0) {
           state.over = true;
-          
-          window.location.href =    `gameover.html?score=${state.score}&time=${document.getElementById('timer').textContent}`;
+          // Calculate the final time directly from the state to ensure accuracy,
+          // instead of reading from the DOM which might not be updated.
+          const finalGameTime = Date.now() - state.startTime - state.totalPausedTime;
+          const minutes = Math.floor(finalGameTime / 60000);
+          const seconds = Math.floor((finalGameTime % 60000) / 1000);
+          const finalTime = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+          // Send score and time to backend
+          sendScoreToBackend(state.score, finalTime);
           return;
       } else {
           // Don't reset the whole state just clear the board and held piece
@@ -215,4 +221,31 @@ export function gameLoop(timestamp) {
   }
 
   requestAnimationFrame(gameLoop);
+}
+
+export async function sendScoreToBackend(score, time) {
+  const payload = {
+    score: score,
+    time: time
+  };
+
+  try {
+    const response = await fetch('/api/playerdata', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Backend responded with an error: ${response.status} - ${errorText}`);
+    }
+
+    const data = await response.json();
+    console.log('Score data sent:', data);
+  } catch (error) {
+    console.error('Error sending score data:', error);
+  } finally {
+    window.location.href = `gameover.html`;
+  }
 }
