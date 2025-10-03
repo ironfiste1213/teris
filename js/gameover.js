@@ -19,7 +19,7 @@ async function fetchAndDisplayScores() {
         const res = await fetch('/api/score'); // <-- FIXED
         if (!res.ok) throw new Error('Could not load leaderboard.');
         const scores = await res.json();
-        allScores = scores;
+        allScores = scores || []; // Ensure allScores is an array, even if API returns null
         currentPage = 1;
         updateLeaderboardView();
     } catch (error) {
@@ -34,9 +34,8 @@ function updateLeaderboardView() {
 }
 
 function displayScores(scoresToDisplay = null) {
-    const scores = scoresToDisplay || allScores;
     if (scoresToDisplay) {
-        allScores = scores; // Update the main list if new data is provided
+        allScores = scoresToDisplay; // Update the main list if new data is provided
     }
 
     const startIndex = (currentPage - 1) * scoresPerPage;

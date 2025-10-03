@@ -17,6 +17,11 @@ func ScoreHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Failed to load scores", http.StatusInternalServerError)
 			return
 		}
+		// Ensure we always return an empty array instead of null for an empty score list.
+		if scores == nil {
+			scores = []Score{}
+		}
+
 		SortScores(scores)                 // Sort first
 		rankedScores := RankScores(scores) // Then assign ranks
 		w.Header().Set("Content-Type", "application/json")
