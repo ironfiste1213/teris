@@ -7,18 +7,18 @@ import (
 )
 
 func main() {
-	// Create a new ServeMux, which is a request router.
+	// create a new ServeMux, which is a request router
 	mux := http.NewServeMux()
 
-	// Handle API requests
+	// handle API requests
 	mux.HandleFunc("/api/score", ScoreHandler)
 	mux.HandleFunc("/api/playerdata", PlayerDataHandler)
 
-	// Serve the static game files from the parent directory.
+	// serve the static game files from the parent directory
 	mux.Handle("/", http.FileServer(http.Dir("..")))
 
 	fmt.Println("Server starting on http://localhost:8080")
 
-	// Start the server with our custom router.
+	// start the server with our custom router
 	log.Fatal(http.ListenAndServe(":8080", mux))
 }

@@ -17,15 +17,15 @@ func ScoreHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Failed to load scores", http.StatusInternalServerError)
 			return
 		}
-		// Ensure we always return an empty array instead of null for an empty score list.
+		// ensure we always return an empty array instead of null for an empty score list
 		if scores == nil {
 			scores = []Score{}
 		}
 
-		SortScores(scores)                 // Sort first
-		rankedScores := RankScores(scores) // Then assign ranks
+		SortScores(scores)                 // sort first
+		rankedScores := RankScores(scores) // then assign ranks
 		w.Header().Set("Content-Type", "application/json")
-		err = json.NewEncoder(w).Encode(rankedScores) // Encode the ranked scores
+		err = json.NewEncoder(w).Encode(rankedScores) // encode the ranked scores
 		if err != nil {
 			http.Error(w, "Failed to encode scores", http.StatusInternalServerError)
 		}
@@ -38,8 +38,8 @@ func ScoreHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// Perform all validation on the new score *before* processing it.
-		// Basic server-side validation
+		// perform all validation on the new score *before* processing it
+		// basic server-side validation
 		if newScore.Name == "" {
 			http.Error(w, "Player name cannot be empty", http.StatusBadRequest)
 			return
@@ -57,29 +57,29 @@ func ScoreHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// Load existing scores to calculate rank
+		// load existing scores to calculate rank
 		scores, err := LoadScores("scores.json")
 		if err != nil {
-			// This is a server error, not a user error.
+			// this is a server error, not a user error
 			http.Error(w, "Failed to load scores for ranking", http.StatusInternalServerError)
 			return
 		}
 
 		scores = append(scores, newScore)
-		SortScores(scores) // Sort to find the rank and prepare for saving
+		SortScores(scores) // sort to find the rank and prepare for saving
 
-		// Find the rank of the new score
+		// find the rank of the new score
 
-		// Save the updated list of scores
+		// save the updated list of scores
 		if err := SaveScores("scores.json", scores); err != nil {
 			http.Error(w, "Failed to save new score", http.StatusInternalServerError)
 			return
 		}
 
-		// Respond with the rank and total scores
+		// respond with the rank and total scores
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
-		rankedScores := RankScores(scores) // Then assign ranks
+		rankedScores := RankScores(scores) // then assign ranks
 
 		err = json.NewEncoder(w).Encode(rankedScores)
 		if err != nil {
@@ -114,7 +114,7 @@ func PlayerDataHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// Write to playerdata.json
+		// write to playerdata.json
 		err = WritePlayerData("playerdata.json", PlayerData{Score: data.Score, Time: data.Time})
 		if err != nil {
 			http.Error(w, "Failed to write player data", http.StatusInternalServerError)
@@ -133,7 +133,7 @@ func PlayerDataHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Failed to read player data", http.StatusInternalServerError)
 			return
 		}
-		// Delete the file after reading to ensure it can only be fetched once.
+		// delete the file after reading to ensure it can only be fetched once
 		os.Remove("playerdata.json")
 
 		w.Header().Set("Content-Type", "application/json")

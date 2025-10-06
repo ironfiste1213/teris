@@ -1,10 +1,5 @@
 package main
 
-
-
-
-
- 
 type Score struct {
     Rank  int    `json:"rank"`
     Name  string `json:"name"`

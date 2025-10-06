@@ -13,8 +13,8 @@ type PlayerData struct {
 	Time  string `json:"time"`
 }
 
-// LoadScores reads a slice of Score from a JSON file.
-// If the file does not exist or is empty, it returns an empty slice and no error.
+// loadScores reads a slice of Score from a JSON file
+// if the file does not exist or is empty, it returns an empty slice and no error
 func LoadScores(filename string) ([]Score, error) {
 	var scores []Score
 	file, err := os.Open(filename)
@@ -28,7 +28,7 @@ func LoadScores(filename string) ([]Score, error) {
 
 	decoder := json.NewDecoder(file)
 	err = decoder.Decode(&scores)
-	// An empty file will result in an EOF error, which we can safely ignore.
+	// an empty file will result in an EOF error, which we can safely ignore
 	if err != nil && !errors.Is(err, io.EOF) {
 		return nil, err
 	}
@@ -36,7 +36,7 @@ func LoadScores(filename string) ([]Score, error) {
 	return scores, nil
 }
 
-// SaveScores marshals a slice of Score into JSON and writes it to a file.
+// saveScores marshals a slice of Score into JSON and writes it to a file
 func SaveScores(filename string, scores []Score) error {
 	data, err := json.MarshalIndent(scores, "", "  ")
 	if err != nil {
@@ -51,8 +51,8 @@ func SortScores(scores []Score) {
 	})
 }
 
-// RankScores iterates over a sorted slice of scores and assigns a rank to each.
-// It modifies the slice in place and returns it.
+// rankScores iterates over a sorted slice of scores and assigns a rank to each
+// it modifies the slice in place and returns it
 func RankScores(scores []Score) []Score {
 	for i := range scores {
 		scores[i].Rank = i + 1
