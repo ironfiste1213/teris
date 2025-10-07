@@ -1,3 +1,21 @@
+#story-message {
+  display: none;
+  position: fixed;
+  left: 50%;
+  top: 40px;
+  transform: translateX(-50%);
+  max-width: 600px;
+  background: rgba(30,30,30,0.92);
+  color: #CFCFCF;
+  border: 2px solid #CFCFCF;
+  border-radius: 0px;
+  padding: 18px 24px;
+  font-size: 15px;
+  text-align: center;
+  transition: opacity 0.4s;
+  z-index: 3000;
+  pointer-events: none;
+}
 * {
   box-sizing: border-box;
   margin: 0;

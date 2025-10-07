@@ -46,14 +46,7 @@ function spawnPiece() {
       view.updateStats();
       if (state.lives <= 0) {
           state.over = true;
-          // Calculate the final time directly from the state to ensure accuracy,
-          // instead of reading from the DOM which might not be updated.
-          const finalGameTime = Date.now() - state.startTime - state.totalPausedTime;
-          const minutes = Math.floor(finalGameTime / 60000);
-          const seconds = Math.floor((finalGameTime % 60000) / 1000);
-          const finalTime = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-          // Send score and time to backend
-          sendScoreToBackend(state.score, finalTime);
+          window.location.href = "gameover.html";
           return;
       } else {
           // Don't reset the whole state just clear the board and held piece
@@ -78,6 +71,7 @@ function updateScore(linesCleared) {
   state.score += basePoints[linesCleared] * state.level;
 }
 
+
 // Clears completed lines from the grid
 function clearLines() {
   let linesCleared = 0;
@@ -98,10 +92,37 @@ function clearLines() {
           state.level += Math.floor(state.linesForLevelUp / 10);
           state.linesForLevelUp %= 10;
           state.dropInterval = Math.max(100, 700 - (state.level - 1) * 60);
+          showLevelUpStory();
       }
       view.updateStats();
   }
 }
+
+const storySentences = [
+  "He feels the weight of every block, each one a memory he cannot place.",
+  "The grid stretches on, endless, a silent testament to his persistence.",
+  "A fleeting hope flickers as the lines vanish, but the emptiness remains.",
+  "He wonders if the next piece will bring salvation or only delay the inevitable.",
+  "The music echoes in the void, a lullaby for the restless.",
+  "He is both the architect and the prisoner of this falling world.",
+  "Each level brings new speed, but the tunnel ahead is as dark as ever.",
+  "He dreams of escape, but the game resets, and he begins again.",
+  "The blocks descend, uncaring, as he chases meaning in their patterns.",
+  "Victory is an illusion, but still, he plays on."
+];
+
+
+function showLevelUpStory() {
+  const msgDiv = document.getElementById('story-message');
+  if (!msgDiv) return;
+  const idx = Math.floor(Math.random() * storySentences.length);
+  msgDiv.textContent = storySentences[idx];
+  msgDiv.style.display = 'block';
+  setTimeout(() => {
+    setTimeout(() => { msgDiv.style.display = 'none'; }, 400);
+  }, 3300);
+}
+
 
 // Locks the active piece into the grid
 function lockPiece() {
@@ -221,31 +242,4 @@ export function gameLoop(timestamp) {
   }
 
   requestAnimationFrame(gameLoop);
-}
-
-export async function sendScoreToBackend(score, time) {
-  const payload = {
-    score: score,
-    time: time
-  };
-
-  try {
-    const response = await fetch('/api/playerdata', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Backend responded with an error: ${response.status} - ${errorText}`);
-    }
-
-    const data = await response.json();
-    console.log('Score data sent:', data);
-  } catch (error) {
-    console.error('Error sending score data:', error);
-  } finally {
-    window.location.href = `gameover.html`;
-  }
 }
